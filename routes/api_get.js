@@ -125,14 +125,10 @@ var parseContraption = function(data){
         idCode: element.id_code,
         denomination: element.denomination,
         type: element.type,
-        typeName: element.contraption_type_name,
         material:element.work_material,
-        materialName: element.material_name,
         machine: element.machine,
-        machineName:element.machine_name,
         purchaseRequest: element.purchase_request,
         order_status: element.order_status,
-        order_status_name:element.order_status_name,
         availableQt: element.available_qt,
         minQt: element.minimum_qt,
         "ut-long": element.geometry_length,
@@ -248,15 +244,9 @@ router.get('/contraptions', function(req, res, next) {
 
 
   let sqlQuery = `SELECT contraption_id, denomination, id_code, available_qt, minimum_qt, order_status,
-    order_status.order_status_name as order_status_name,
     geometry_diameter,geometry_radius,geometry_length, geometry_degree, geometry_thickness,
-    machine, machine.name as machine_name, type, contraption_type.name as contraption_type_name,
-    material.name as material_name, work_material, purchase_request
+    machine, type, work_material, purchase_request
     FROM contraption
-    LEFT JOIN machine ON (contraption.machine = machine.machine_id)
-    LEFT JOIN order_status ON (contraption.order_status = order_status.order_status_id)
-    LEFT JOIN material ON (contraption.work_material = material.material_id)
-    LEFT JOIN contraption_type ON (contraption.type = contraption_type.contraption_type_id)
     ${whereClause}
 		${materialSearch}
     ${orderStatusSearch}

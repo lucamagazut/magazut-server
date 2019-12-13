@@ -6,6 +6,7 @@ var orderManager = require('../order-manager');
 router.put(['/charge', '/discharge'], function(req, res, next) {
   const queryRequest = req.query;
   const contraptionId = queryRequest.id;
+  const operator = queryRequest.op;
   const contraptionQtToAdd = req.path === '/discharge' ? -(Number(queryRequest.qt)) : Number(queryRequest.qt);
   let newData = {data:[]};
   let newObjContraction = {
@@ -21,10 +22,11 @@ router.put(['/charge', '/discharge'], function(req, res, next) {
 
   console.log(sqlQuerySelect)
   req.magazutDb.task(t => {
-    return t.one(sqlQuerySelect,)
+    return t.one(sqlQuerySelect)
       .then(item => {
         if(!orderManager.validate(item.available_qt, contraptionQtToAdd)){
-          return this.reject();
+          console.log('entra qui');
+          throw {name:'error',type:'invalidRequest'};
         }
         newState = orderManager.getNewState(item.available_qt, item.minimum_qt, item.order_status, contraptionQtToAdd);
         newQt = item.available_qt + contraptionQtToAdd;
@@ -36,13 +38,34 @@ router.put(['/charge', '/discharge'], function(req, res, next) {
     })
     .then(events => {
       newObjContraction.attributes.availableQt = newQt;
-      newObjContraction.attributes.state = newState;
+      newObjContraction.attributes.order_status = newState;
       res.send(newData);
     })
     .catch(error => {
       console.log('errore');
+      console.log(error);
         res.send(error);
     });
 });
+
+
+
+router.put('/order', function(req, res, next) {
+  const queryRequest = req.query;
+  const contraptionId = queryRequest.id;
+  const order_status = queryRequest.order_status;
+  console.log('cacca1');
+  req.magazutDb.none('UPDATE contraption SET order_status=$2 WHERE contraption_id=$1', [contraptionId, order_status])
+      .then(function() {
+        console.log('cacca2');
+          res.send({data:{type:'contraption',id:contraptionId,attributes:{order_status:order_status}}});
+      })
+      .catch(function(error) {
+        console.log('errore');
+        console.log(error);
+          res.send(error);
+      });
+});
+
 
 module.exports = router;

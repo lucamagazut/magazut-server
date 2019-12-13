@@ -1,17 +1,6 @@
 var express = require('express');
 var router = express.Router();
-
-var getNewState = function(availableQt, minQt, currentOrderState, addingQt){
-  let newQt = availableQt + addingQt;
-  if(newQt > minQt){
-    return 1;
-  }
-  if(newQt > 0){
-    return 2;
-  }else{
-    return 0;
-  }
-};
+var orderManager = require('../order-manager');
 
 
 var parseSingleContraption = function(singleRecord){
@@ -65,7 +54,10 @@ router.patch('/contraptions/:id', function(req, res, next) {
     WHERE contraption_id=$15
     RETURNING *`;
 
-  newState = getNewState(queryRequest.availableQt, queryRequest.minQt, 0, 0);
+  newState = orderManager.getNewState(queryRequest.availableQt, queryRequest.minQt, queryRequest.order_status, 0);
+  console.log('@#@#@#@#@#');
+  console.log(newState);
+
   let updateQUeryParam=[
     queryRequest.denomination,
     queryRequest.type,

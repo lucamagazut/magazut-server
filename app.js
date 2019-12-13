@@ -4,6 +4,8 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const pgp = require('pg-promise')();
+var config = require('./config.js');
+
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -17,13 +19,7 @@ const apiRouterDelete = require('./routes/api_delete');
 
 var app = express();
 
-const cn = {
-    host: 'localhost',
-    port: 5432,
-    database: 'magazut',
-    user: 'postgres',
-    password: 'password'
-};
+const cn = config.db_credential;
 
 const db = pgp(cn);
 var dbMiddle = function (req, res, next) {
