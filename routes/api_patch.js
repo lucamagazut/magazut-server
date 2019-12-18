@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
-var orderManager = require('../order-manager');
-
+var orderManager = require('../services/order-manager');
+var history = require('../services/history');
 
 var parseSingleContraption = function(singleRecord){
   let newData = {
@@ -85,6 +85,7 @@ console.log('updateQUeryParam');
       .then(function(data) {
           console.log('@@@@@ entra ok');
           console.log(data);
+          history.addModifyRecord(req, contraptionId,updateQUeryParam)
           newData.data = parseSingleContraption(data)
           res.send(newData);
       })

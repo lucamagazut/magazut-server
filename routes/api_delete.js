@@ -1,15 +1,21 @@
 var express = require('express');
 var router = express.Router();
+var history = require('../services/history');
 
 
 router.delete('/contraptions/:id', function(req, res, next) {
   const contraptionId = Number(req.params.id);
-  req.magazutDb.none('DELETE FROM contraption WHERE contraption_id=$1', [contraptionId])
+  const sqlQuery = 'UPDATE contraption SET is_deleted=TRUE WHERE contraption_id=$1';
+  req.magazutDb.none(sqlQuery, [contraptionId])
       .then(function() {
+          history.addDeleteRecord(req, contraptionId);
+          console.log('dopo addDeleteRecord');
           res.send({data:{type:'contraption',id:contraptionId}});
       })
       .catch(function(error) {
-          res.send(error);
+        history.addErrorRecord(req, 0, sqlQuery, error);
+        console.log(error);;
+        res.send(error);
       });
 });
 

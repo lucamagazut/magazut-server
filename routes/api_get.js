@@ -1,59 +1,6 @@
 var express = require('express');
 var router = express.Router();
 
-const geometryFilters = [
-  {
-    id:1,
-    type:'ut-long',
-    attributes:{
-      name:"Geometria-lunghezza",
-      tokens:[
-        "(l{1}|long{1}|lung{1}|lunghezza{1})[ ]*[0-9]+([ ]|$|mm)"
-      ]
-    }
-  },
-  {
-    id:1,
-    type:'ut-dia',
-    attributes:{
-      name:"Geometria-diametro",
-      tokens:[
-        "(d{1}|dia{1}|diametro{1})[ ]*[0-9]+([ ]|$|mm)"
-      ]
-    }
-  },
-  {
-    id:1,
-    type:'ut-deg',
-    attributes:{
-      name:"Geometria-angolo",
-      tokens:[
-        "((gradi{1}|deg{1})[ ]*[0-9]+([ ]|$|mm)) | ([0-9]+[ ]*(gradi{1})([ ]|$|mm))"
-      ]
-    }
-  },
-  {
-    id:1,
-    type:'ut-rad-ins',
-    attributes:{
-      name:"Geometria-raggio inserto",
-      tokens:[
-        "(r{1}|raggio{1})[ ]*[0-9]+([ ]|$|mm)"
-      ]
-    }
-  },
-  {
-    id:1,
-    type:'ut-thick',
-    attributes:{
-      name:"Geometria-spessore",
-      tokens:[
-        "(s{1}|spess{1}|spessore{1}|spesso{1})[ ]*[0-9]+([ ]|$|mm)"
-      ]
-    }
-  }
-];
-
 var parseOperator = function(data){
   let newData = {data:[]};
   data.forEach(element => {
@@ -197,7 +144,7 @@ router.get('/search-filters', function(req, res, next) {
             return t.any('SELECT * FROM contraption_type');
         })
         .then(contraption_type => {
-            data.data = data.data.concat(parseContraptionType(contraption_type)).concat(geometryFilters);
+            data.data = data.data.concat(parseContraptionType(contraption_type));
             return t.any('SELECT * FROM order_status');
         })
         .then(order_status => {
@@ -240,7 +187,7 @@ router.get('/contraptions', function(req, res, next) {
   let orderStatusSearch = queryRequest['order_status'] ? ` AND order_status = ${queryRequest['order_status']}` : '';
 
 
-  let whereClause = ' WHERE TRUE = TRUE ';
+  let whereClause = ' WHERE is_deleted = FALSE ';
 
 
   let sqlQuery = `SELECT contraption_id, denomination, id_code, available_qt, minimum_qt, order_status,

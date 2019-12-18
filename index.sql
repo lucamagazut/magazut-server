@@ -23,6 +23,7 @@ update machine
 set name='Generico',tokens='{"generico"}'
 where machine_id=1;
 
+select EXTRACT(minute FROM transaction_date) from history
 
 INSERT INTO contraption (denomination, type, machine, work_material, id_code, geometry)
 values
@@ -46,4 +47,16 @@ CREATE TABLE contraption (
   minimum_qt INTEGER DEFAULT 0,
   order_state INTEGER  DEFAULT 1,
   geometry JSON NOT NULL
+);
+
+CREATE TABLE history (
+	history_event_id SERIAL PRIMARY KEY not null,
+	user_id INTEGER REFERENCES employee(employee_id) DEFAULT 0,
+	transaction_id INTEGER REFERENCES transaction(transaction_id) NOT NULL,
+	contraption_id INTEGER REFERENCES contraption(contraption_id) DEFAULT 0,
+	involved_quantity INTEGER DEFAULT 0,
+	http_app_location JSON NOT NULL,
+	http_api_location JSON NOT NULL,
+	log JSON DEFAULT '{}'
+	transaction_date date not null default CURRENT_TIMESTAMP
 );

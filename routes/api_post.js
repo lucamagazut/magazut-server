@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
-var orderManager = require('../order-manager');
+var orderManager = require('../services/order-manager');
+var history = require('../services/history');
 
 var illecitPost = function(queryObj){
   if(queryObj.type !== 'contraptions'){
@@ -76,14 +77,16 @@ router.post('/contraptions', function(req, res) {
     console.log(requestPostParams);
   if(illecitPost(requestPostParams)){
     console.log('ILLECITO');
+    history.addErrorRecord(req, 0, '', {"description":"Validazione fallita"});
     throw "Wrong Parameters";
   }
   console.log('oltre ILLECITO');
 
-  req.magazutDb.any(getSqlQuery(), getSqlVars(requestPostParams))
+  let sqlQuery = getSqlQuery();
+  req.magazutDb.any(sqlQuery, getSqlVars(requestPostParams))
     .then(data => {
       console.log('TUTTO OK');
-
+      history.addCreatingRecord(req, data[0].contraption_id);
       var objToReturn = {
         'data':
           {
@@ -99,6 +102,7 @@ router.post('/contraptions', function(req, res) {
     })
     .catch(error => {
         console.log('ERROR:', error);
+        history.addErrorRecord(req, 0, sqlQuery, error);
         res.send(error);
     });
 

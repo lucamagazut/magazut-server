@@ -1,7 +1,6 @@
 
 var app = {};
 
-
 app.getNewState = function(availableQt, minQt, currentOrderStatus, addingQt){
   let newQt = availableQt + addingQt;
   let isCharging = addingQt > 0;
@@ -10,7 +9,7 @@ app.getNewState = function(availableQt, minQt, currentOrderStatus, addingQt){
   minQt = Number(minQt);
   addingQt = Number(addingQt);
   availableQt = Number(availableQt);
-  // 
+  //
   // console.log('currentOrderStatus '+ currentOrderStatus);
   // console.log('availableQt '+ availableQt);
   // console.log('minQt '+ minQt);
