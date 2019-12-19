@@ -180,7 +180,7 @@ router.get('/contraptions', function(req, res, next) {
 
   if(queryRequest.filter){
     if(queryRequest.filter == 'runout'){
-      sqlQuery = 'SELECT * FROM contraption WHERE order_status!=1 AND order_status!=5 AND contraption_id!=0';
+      sqlQuery = 'SELECT * FROM contraption WHERE order_status!=1 AND order_status!=5 ';
     }
   }else{
     let radiusSearch = queryRequest['geometry_radius'] ? ` AND geometry_radius = ${queryRequest['geometry_radius']}` : '';
@@ -193,8 +193,6 @@ router.get('/contraptions', function(req, res, next) {
     let machineSearch = queryRequest['machine'] ? ` AND machine IN (${queryRequest['machine']})` : '';
     let idCodeSearch = queryRequest['id-code'] ? ` AND contraption.id_code LIKE '%${queryRequest["id-code"]}%'`: '';
     let orderStatusSearch = queryRequest['order_status'] ? ` AND order_status = ${queryRequest['order_status']}` : '';
-    let removeZeroId = ' AND contraption_id!=0 '
-
 
     let whereClause = ' WHERE is_deleted = FALSE ';
 
@@ -213,7 +211,6 @@ router.get('/contraptions', function(req, res, next) {
     ${lengthSearch}
     ${diameterSearch}
     ${idCodeSearch}
-    ${removeZeroId}
     ;`;
 
   }

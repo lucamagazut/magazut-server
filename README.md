@@ -1,6 +1,9 @@
 # magazut-server
 Server for magazut app
 
+*This is NOT a collaborative project. Do whatever you want but NOT submit issues, pull request, code. Thanks.*
+
+
 Request accettate:
 * http://localhost:3000/api/operators
 * http://localhost:3000/api/search-filters
