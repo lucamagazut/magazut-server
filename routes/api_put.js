@@ -68,7 +68,8 @@ router.put('/order', function(req, res, next) {
   req.magazutDb.none('UPDATE contraption SET order_status=$2 WHERE contraption_id=$1', [contraptionId, order_status])
       .then(function() {
         console.log('cacca2');
-          res.send({data:{type:'contraption',id:contraptionId,attributes:{order_status:order_status}}});
+        history.addModifyRecord(req, contraptionId, {order_status:order_status});
+        res.send({data:{type:'contraption',id:contraptionId,attributes:{order_status:order_status}}});
       })
       .catch(function(error) {
         console.log('errore');
