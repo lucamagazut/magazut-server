@@ -1,0 +1,27 @@
+var app = {};
+
+app.db_credential = {
+  host: '',
+  port: ,
+  database: '',
+  user: '',
+  password: ''
+};
+
+app.email_credential = {
+  transporter_obj:{
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
+    auth: {
+        user: '',
+        pass: ''
+    }
+  },
+  mailOptions: {
+    to: '',
+    subject: ''
+  }
+};
+
+module.exports = app;

@@ -5,6 +5,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const pgp = require('pg-promise')();
 var config = require('./config.js');
+var nodeMailer = require('nodemailer');
 
 
 var indexRouter = require('./routes/index');
@@ -27,6 +28,41 @@ var dbMiddle = function (req, res, next) {
   next();
 };
 
+var mailMiddle = function(req, res, next){
+  let transporter = nodeMailer.createTransport(config.email_credential.transporter_obj);
+
+  var createMessage = function(id_code, denomination, available_qt, purchase_request){
+    let message = `
+      Il prodotto [${denomination}] id-code=[${id_code}] è esaurito o sta per esaurirsi.
+      La quantità attuale è [${available_qt}].
+      Si prega di ordinare [${purchase_request}].
+
+
+      ------------------------------------------------
+      Email generata automaticamente dalla app per la gestione del magazzino utensili.
+      Non rispondere, questa casella email non è monitorata.
+    `;
+    return message;
+  };
+
+  var mailOptions = {
+      to: config.email_credential.mailOptions.to,
+      subject: config.email_credential.mailOptions.subject,
+      text: ''
+  };
+
+  req.sendOrderMail = function(id_code, denomination, available_qt, purchase_request){
+    mailOptions.text = createMessage(id_code, denomination, available_qt, purchase_request);
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        return console.log(error);
+      }
+      console.log('Mail di ordine mandata');
+    });
+  };
+  next();
+};
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -45,6 +81,7 @@ app.use(function(req, res, next) {
 });
 
 app.use('/',dbMiddle);
+app.use('/',mailMiddle);
 // app.use('/', indexRouter);
 // app.use('/users', usersRouter);
 app.use('/api',apiRouterGet);

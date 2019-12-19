@@ -37,7 +37,7 @@ var getSqlQuery = function(){
       geometry_thickness,
       geometry_degree
     ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
-      RETURNING contraption_id,order_status
+      RETURNING contraption_id,order_status,denomination,available_qt,purchase_request,id_code
       `;
 
       return sqlQuery;
@@ -83,17 +83,20 @@ router.post('/contraptions', function(req, res) {
   console.log('oltre ILLECITO');
 
   let sqlQuery = getSqlQuery();
-  req.magazutDb.any(sqlQuery, getSqlVars(requestPostParams))
-    .then(data => {
+  req.magazutDb.one(sqlQuery, getSqlVars(requestPostParams))
+    .then(item => {
       console.log('TUTTO OK');
-      history.addCreatingRecord(req, data[0].contraption_id);
+      history.addCreatingRecord(req, item.contraption_id);
+      if(orderManager.sendMail(item.order_status)){
+        req.sendOrderMail(item.id_code, item.denomination, item.available_qt, item.purchase_request);
+      }
       var objToReturn = {
         'data':
           {
-            "id":data[0].contraption_id,
+            "id":item.contraption_id,
             "type": "contraption",
             attributes:{
-              order_status:data[0].order_status
+              order_status:item.order_status
             }
           }
       };

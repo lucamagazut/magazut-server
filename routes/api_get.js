@@ -180,7 +180,7 @@ router.get('/contraptions', function(req, res, next) {
 
   if(queryRequest.filter){
     if(queryRequest.filter == 'runout'){
-      sqlQuery = 'SELECT * FROM contraption WHERE order_status!=1 AND order_status!=5 ';
+      sqlQuery = 'SELECT * FROM contraption WHERE order_status!=1 AND order_status!=5 AND is_deleted = FALSE';
     }
   }else{
     let radiusSearch = queryRequest['geometry_radius'] ? ` AND geometry_radius = ${queryRequest['geometry_radius']}` : '';

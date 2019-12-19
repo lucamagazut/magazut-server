@@ -82,11 +82,14 @@ router.patch('/contraptions/:id', function(req, res, next) {
 console.log('updateQUeryParam');
   console.log(updateQUeryParam);
   req.magazutDb.one(updateQuery, updateQUeryParam)
-      .then(function(data) {
+      .then(function(item) {
           console.log('@@@@@ entra ok');
-          console.log(data);
-          history.addModifyRecord(req, contraptionId,updateQUeryParam)
-          newData.data = parseSingleContraption(data)
+          console.log(item);
+          history.addModifyRecord(req, contraptionId,updateQUeryParam);
+          if(orderManager.sendMail(item.order_status)){
+            req.sendOrderMail(item.id_code, item.denomination, item.available_qt, item.purchase_request);
+          }
+          newData.data = parseSingleContraption(item);
           res.send(newData);
       })
       .catch(function(error) {
