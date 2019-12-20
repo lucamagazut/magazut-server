@@ -213,6 +213,8 @@ router.get('/contraptions', function(req, res, next) {
     ${diameterSearch}
     ${idCodeSearch}
     ${textSearch  }
+    ORDER BY contraption_id ASC
+    LIMIT 25
     ;`;
 
   }
