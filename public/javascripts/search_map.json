@@ -1,0 +1,212 @@
+{
+  "filters":{
+    "contraption_type":[
+      {
+        "name":"punte",
+        "tokens":["punta"],
+        "id":[4,5,6,7],
+        "subtypes":[
+          {
+            "name":"hss",
+            "id":[4],
+            "tokens":["hss","superrapido"]
+          },
+          {
+            "name":"widia",
+            "id":[5],
+            "tokens":["widia","dura"]
+          },
+          {
+            "name":"cuspide",
+            "id":[6],
+            "tokens":["cuspide","a cuspide"]
+          },
+          {
+            "name":"inserti",
+            "id":[7],
+            "tokens":["inserti", "a inserti", "placchette", "cannone"]
+          }
+        ]
+      },
+      {
+        "name":"frese",
+        "id":[8,9,10,11,12],
+        "tokens":["fresa"],
+        "subtypes":[
+          {
+            "name": "inserti",
+            "id":[8],
+            "tokens":["inserti","placchette","piko"],
+            "subtypes":[
+              {
+                "name":"piko",
+                "tokens":["piko"]
+              },
+              {
+                "name":"Per sgrossatura",
+                "tokens":["sgrossa","sgrossatura"]
+              },
+              {
+                "name":"Per finitura",
+                "tokens":["finitura"]
+              }
+            ]
+          },
+          {
+            "name":"A candela",
+            "id":[9,10],
+            "tokens":["candela","cilindrica","widia","hss"],
+            "subtypes":[
+              {
+                "name":"Widia",
+                "id":[9],
+                "tokens":["widia","dura"]
+              },
+              {
+                "name":"HSS",
+                "id":[10],
+                "tokens":["hss","rapido"]
+              }
+            ]
+          },
+          {
+            "name":"A disco",
+            "id":[11],
+            "tokens":["disco", "piatta", "circolare"]
+          },
+          {
+            "name":"Di Forma",
+            "id":[12],
+            "tokens":["forma"]
+          }
+        ]
+      },
+      {
+        "name":"Porta utensile",
+        "id":[2],
+        "tokens":["porta utensile","portautensile"]
+      },
+      {
+        "name":"Utensile",
+        "id":[13],
+        "tokens":["utensile"]
+      },
+      {
+        "name":"Inserto",
+        "id":[3],
+        "tokens":["inserto","inserti"],
+        "subtypes":[]
+      }
+    ],
+    "machine":[
+      {
+        "name":"Tornio",
+        "id":[6,5],
+        "tokens":["tornio","torni","tornitura"],
+        "subtypes":[
+          {
+            "name":"Manuale",
+            "id":[5],
+            "tokens":["manuale"]
+          },
+          {
+            "name":"CNC",
+            "id":[6],
+            "tokens":["cnc"]
+          }
+        ]
+      },
+      {
+        "name":"Centro di lavoro",
+        "id":[2],
+        "tokens":["centro","fresatrice","alesatrice"]
+      },
+      {
+        "name":"Strozza",
+        "id":[4],
+        "tokens":["strozza","strozzatrice","chiavetta"]
+      },
+      {
+        "name":"Trapano",
+        "id":[3],
+        "tokens":["trapano","radiale","foratrice"]
+      }
+    ],
+    "material":[
+      {
+        "name":"Acciaio",
+        "id":[2],
+        "tokens":["acciaio","fe","c40","c45"]
+      },
+      {
+        "name":"Acciaio Antiusura",
+        "id":[3],
+        "tokens":["hardox","antiusura"]
+      },
+      {
+        "name":"Acciaio Antiusura",
+        "id":[3],
+        "tokens":["hardox","antiusura"]
+      },
+      {
+        "name":"Rame",
+        "id":[4],
+        "tokens":["rame"]
+      },
+      {
+        "name":"Alluminio",
+        "id":[5],
+        "tokens":["alluminio","alu"]
+      },
+      {
+        "name":"Acciaio inox",
+        "id":[6],
+        "tokens":["inox","aisi"]
+      },
+      {
+        "name":"Acciaio Temprato",
+        "id":[7],
+        "tokens":["temprato","trattato","cementato","tempra","cemento"]
+      }
+    ],
+    "filter":[
+      {
+        "name":"Filtro Runout",
+        "id":["runout"],
+        "tokens":["{runout}"]
+      }
+    ]
+  },
+  "geometryFilter":{
+    "geometry_length":{
+      "name":"Geometria-lunghezza",
+      "tokens":[
+        "(l{1}|long{1}|lung{1}|lunghezza{1})[ ]*[0-9]+([ ]|$|mm)"
+      ]
+    },
+    "geometry_radius":{
+      "name":"Geometria-raggio inserto",
+      "tokens":[
+        "(r{1}|raggio{1})[ ]*[0-9]+([ ]|$|mm)"
+      ]
+    },
+    "geometry_degree":{
+      "name":"Geometria-angolo",
+      "tokens":[
+        "((gradi{1}|deg{1})[ ]*[0-9]+([ ]|$|mm)) | ([0-9]+[ ]*(gradi{1})([ ]|$|mm))"
+      ]
+    },
+    "geometry_thickness":{
+      "name":"Geometria-spessore",
+      "tokens":[
+        "(s{1}|spess{1}|spessore{1}|spesso{1})[ ]*[0-9]+([ ]|$|mm)"
+      ]
+    },
+    "geometry_diameter":{
+      "name":"Geometria-diametro",
+      "tokens":[
+        "(d{1}|dia{1}|diametro{1})[ ]*[0-9]+([ ]|$|mm)"
+      ]
+    }
+  }
+}
