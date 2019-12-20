@@ -129,7 +129,7 @@ router.get('/operators', function(req, res, next) {
       });
 });
 
-router.get('/search-filters', function(req, res, next) {
+router.get('/categories', function(req, res, next) {
   let data = {data:[]};
   req.magazutDb.task(t => {
         // this.ctx = task config + state context;
