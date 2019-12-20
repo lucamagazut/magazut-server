@@ -192,6 +192,7 @@ router.get('/contraptions', function(req, res, next) {
     let typeSearch = queryRequest['contraption_type'] ? ` AND type IN (${queryRequest['contraption_type']})` : '';
     let machineSearch = queryRequest['machine'] ? ` AND machine IN (${queryRequest['machine']})` : '';
     let idCodeSearch = queryRequest['id-code'] ? ` AND contraption.id_code LIKE '%${queryRequest["id-code"]}%'`: '';
+    let textSearch = queryRequest['text'] ? ` AND contraption.denomination LIKE '%${queryRequest["text"]}%'`: '';
     let orderStatusSearch = queryRequest['order_status'] ? ` AND order_status = ${queryRequest['order_status']}` : '';
 
     let whereClause = ' WHERE is_deleted = FALSE ';
@@ -211,6 +212,7 @@ router.get('/contraptions', function(req, res, next) {
     ${lengthSearch}
     ${diameterSearch}
     ${idCodeSearch}
+    ${textSearch  }
     ;`;
 
   }
