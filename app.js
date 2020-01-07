@@ -40,7 +40,7 @@ var mailMiddle = function(req, res, next){
 
       ------------------------------------------------
       Email generata automaticamente dalla app per la gestione del magazzino utensili.
-      Non rispondere, questa casella email non è monitorata.
+      Non rispondere, questa casella email non è monitorata. Per ogni comunicazione scrivere a ${config.email_credential.reference}
     `;
     return message;
   };
