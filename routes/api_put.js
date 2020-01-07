@@ -67,18 +67,31 @@ router.put('/order', function(req, res, next) {
   const queryRequest = req.query;
   const contraptionId = queryRequest.id;
   const order_status = queryRequest.order_status;
-  console.log('cacca1');
-  req.magazutDb.none('UPDATE contraption SET order_status=$2 WHERE contraption_id=$1', [contraptionId, order_status])
-      .then(function() {
-        console.log('cacca2');
-        history.addModifyRecord(req, contraptionId, {order_status:order_status});
-        res.send({data:{type:'contraption',id:contraptionId,attributes:{order_status:order_status}}});
-      })
-      .catch(function(error) {
-        console.log('errore');
-        console.log(error);
-          res.send(error);
+  var newOrderStatus;
+
+  req.magazutDb.task(t => {
+    return t.one(`SELECT minimum_qt, available_qt, order_status FROM contraption WHERE contraption_id = $1`, [contraptionId])
+      .then(item => {
+        newOrderStatus = orderManager.changeNewStatus(item.available_qt, item.minQt, item.order_status, order_status);
+        console.log('@@@@@@@@@@@@ newOrderStatus @@@@@@@@@@@');
+        console.log(newOrderStatus);
+        return t.one('UPDATE contraption SET order_status=$2 WHERE contraption_id=$1 RETURNING *', [contraptionId, newOrderStatus]);
       });
+    })
+    .then((item) => {
+      if(orderManager.sendMail(newOrderStatus)){
+        req.sendOrderMail(item.id_code, item.denomination, item.available_qt, item.purchase_request);
+      }
+      history.addModifyRecord(req, contraptionId, {order_status:newOrderStatus});
+      res.send({data:{type:'contraption',id:contraptionId,attributes:{order_status:newOrderStatus}}});
+    })
+    .catch(error => {
+      console.log('errore');
+      console.log(error);
+        // history.addErrorRecord(req, contraptionId, lastSqlQuery, error);
+        res.send(error);
+    });
+
 });
 
 

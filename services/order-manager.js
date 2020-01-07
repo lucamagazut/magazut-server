@@ -15,6 +15,33 @@ app.sendMail = function(order_status){
   return order_status == 0 || order_status == 2;
 };
 
+app.changeNewStatus = function(availableQt, minQt, currentOrderStatus, newOrderStatus){
+
+  currentOrderStatus = Number(currentOrderStatus);
+  minQt = Number(minQt);
+  availableQt = Number(availableQt);
+  newOrderStatus = Number(newOrderStatus);
+
+  if(newOrderStatus == 3 || newOrderStatus == 4 || newOrderStatus == 5 ){
+    return newOrderStatus;
+  }
+  else if(newOrderStatus == 0){
+    if(availableQt > 0){
+      return 2;
+    }else{
+      return 0;
+    }
+  }
+  else {
+    // if(newOrderStatus == 1 || newOrderStatus == 2)
+    if(availableQt > 0){
+      return newOrderStatus;
+    }else{
+      return 0;
+    }
+  }
+};
+
 app.getNewState = function(availableQt, minQt, currentOrderStatus, addingQt){
   let newQt = availableQt + addingQt;
   let isCharging = addingQt > 0;
