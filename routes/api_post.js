@@ -87,9 +87,9 @@ router.post('/contraptions', function(req, res) {
     .then(item => {
       console.log('TUTTO OK');
       // history.addCreatingRecord(req, item.contraption_id);
-      if(orderManager.sendMail(item.order_status)){
-        req.sendOrderMail(item.id_code, item.denomination, item.available_qt, item.purchase_request);
-      }
+      // if(orderManager.sendMail(item.order_status)){
+      //   req.sendOrderMail(item.id_code, item.denomination, item.available_qt, item.purchase_request);
+      // }
       var objToReturn = {
         'data':
           {
