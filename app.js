@@ -7,7 +7,6 @@ const pgp = require('pg-promise')();
 var config = require('./config.js');
 var nodeMailer = require('nodemailer');
 
-
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 const apiRouterGet = require('./routes/api_get');
@@ -64,8 +63,9 @@ var mailMiddle = function(req, res, next){
 };
 
 app.use(function(req, res, next) {
-  if(req.app.get('env') == 'development'){
-    res.header("Access-Control-Allow-Origin", "http://localhost:4200"); // update to match the domain you will make the request from
+  // if(req.app.get('env') == 'development'){
+  if(true){
+    res.header("Access-Control-Allow-Origin", "*"); // update to match the domain you will make the request from
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     res.header("Access-Control-Allow-Methods","GET, PUT, POST, DELETE, HEAD, UPDATE, PATCH");
   }
@@ -84,8 +84,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/',dbMiddle);
 app.use('/',mailMiddle);
-// app.use('/', indexRouter);
-// app.use('/users', usersRouter);
 app.use('/api',apiRouterGet);
 app.use('/api',apiRouterPut);
 app.use('/api',apiRouterPost);

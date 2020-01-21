@@ -119,6 +119,18 @@ var parseStatus = function(data){
   return newData;
 };
 
+var parseUnloadingHistory = function(data){
+  let newData = [];
+  data.forEach((element,index) => {
+    newData.push({
+      id: index,
+      type:"unloading-history",
+      attributes:element
+    });
+  });
+  return newData;
+};
+
 router.get('/operators', function(req, res, next) {
   req.magazutDb.any('SELECT * FROM employee', [true])
       .then(function(data) {
@@ -225,6 +237,35 @@ router.get('/contraptions', function(req, res, next) {
       console.log('funzia')
       console.log(sqlQuery);
       data.data = data.data.concat(parseContraption(dbRes));
+      res.send(data);
+    })
+    .catch(function(error) {
+      console.log('non funzia');
+      console.log(error);
+        res.send(sqlQuery);
+    });
+});
+
+
+router.get('/unloading-histories', function(req, res, next) {
+  const queryRequest = req.query;
+  let data = {data:[]};
+  var sqlQuery = `SELECT
+    transaction_time, involved_quantity,
+    http_app_location, http_api_location, log, employee.name AS employee_name,
+    employee.second_name AS employee_second_name,
+    contraption.denomination AS contraption_denomination,
+    contraption.id_code AS contraption_id_code
+
+    FROM history LEFT JOIN employee ON (user_id = employee_id) LEFT JOIN contraption ON (history.contraption_id = contraption.contraption_id)
+
+    WHERE transaction_id=2
+    ORDER BY history_event_id ASC
+    LIMIT 25`;
+
+  req.magazutDb.any(sqlQuery, [true])
+    .then(function(dbRes) {
+      data.data = data.data.concat(parseUnloadingHistory(dbRes));
       res.send(data);
     })
     .catch(function(error) {
