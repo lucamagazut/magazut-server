@@ -60,3 +60,9 @@ CREATE TABLE history (
 	log JSON DEFAULT '{}'
 	transaction_date date not null default CURRENT_TIMESTAMP
 );
+ALTER TABLE contraption
+ALTER COLUMN geometry_diameter TYPE numeric,
+ALTER COLUMN geometry_radius TYPE numeric,
+ALTER COLUMN geometry_length TYPE numeric,
+ALTER COLUMN geometry_degree TYPE numeric,
+ALTER COLUMN geometry_thickness TYPE numeric
