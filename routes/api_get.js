@@ -190,7 +190,10 @@ router.get('/contraptions', function(req, res, next) {
   let data = {data:[]};
   var sqlQuery = '';
 
-  if(queryRequest.filter){
+  if(queryRequest.c_id){
+    sqlQuery = `SELECT * FROM contraption WHERE contraption_id=${queryRequest.c_id}`;
+  }
+  else if(queryRequest.filter){
     if(queryRequest.filter == 'runout'){
       sqlQuery = 'SELECT * FROM contraption WHERE order_status!=1 AND order_status!=5 AND is_deleted = FALSE';
     }
@@ -250,8 +253,11 @@ router.get('/contraptions', function(req, res, next) {
 router.get('/unloading-histories', function(req, res, next) {
   const queryRequest = req.query;
   let data = {data:[]};
+  let pageQuery= Number(queryRequest.page);
+  let limit = 15;
+  var offset = pageQuery * limit;
   var sqlQuery = `SELECT
-    transaction_time, involved_quantity,
+    transaction_time, involved_quantity, history.contraption_id,
     http_app_location, http_api_location, log, employee.name AS employee_name,
     employee.second_name AS employee_second_name,
     contraption.denomination AS contraption_denomination,
@@ -261,9 +267,12 @@ router.get('/unloading-histories', function(req, res, next) {
 
     WHERE transaction_id=2
     ORDER BY history_event_id ASC
-    LIMIT 25`;
+    LIMIT $2
+    OFFSET $1`;
 
-  req.magazutDb.any(sqlQuery, [true])
+    console.log(sqlQuery);
+
+  req.magazutDb.any(sqlQuery, [offset, limit])
     .then(function(dbRes) {
       data.data = data.data.concat(parseUnloadingHistory(dbRes));
       res.send(data);
