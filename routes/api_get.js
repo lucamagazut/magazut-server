@@ -62,7 +62,7 @@ var parseContraptionType = function(data){
   return newData;
 };
 
-var parseContraption = function(data){
+var parseContraption = function(data, pagination){
   let newData = [];
   data.forEach(element => {
     newData.push({
@@ -78,6 +78,8 @@ var parseContraption = function(data){
         order_status: element.order_status,
         availableQt: element.available_qt,
         minQt: element.minimum_qt,
+        total_contraptions_found: element.total_contraptions_found || 1,
+        pagination:pagination || 0,
         "ut-long": element.geometry_length,
         "ut-thick": element.geometry_thickness,
         "ut-rad-ins": element.geometry_radius,
@@ -86,6 +88,7 @@ var parseContraption = function(data){
       }
     });
   });
+
   return newData;
 };
 
@@ -189,13 +192,23 @@ router.get('/contraptions', function(req, res, next) {
   const queryRequest = req.query;
   let data = {data:[]};
   var sqlQuery = '';
+  let itemForPage = queryRequest.items || 25;
+  let currentPage = queryRequest.page;
+  let offset = itemForPage ? itemForPage * currentPage : 0;
 
   if(queryRequest.c_id){
     sqlQuery = `SELECT * FROM contraption WHERE contraption_id=${queryRequest.c_id}`;
   }
   else if(queryRequest.filter){
     if(queryRequest.filter == 'runout'){
-      sqlQuery = 'SELECT * FROM contraption WHERE order_status!=1 AND order_status!=5 AND is_deleted = FALSE';
+      sqlQuery = `SELECT *, count(*) OVER() AS total_contraptions_found
+        FROM contraption
+        WHERE order_status!=1
+        AND order_status!=5
+        AND is_deleted = FALSE
+        LIMIT ${itemForPage}
+        OFFSET ${offset}
+        `;
     }
   }else{
     let radiusSearch = queryRequest['geometry_radius'] ? ` AND geometry_radius = ${queryRequest['geometry_radius']}` : '';
@@ -214,7 +227,7 @@ router.get('/contraptions', function(req, res, next) {
 
     sqlQuery = `SELECT contraption_id, denomination, id_code, available_qt, minimum_qt, order_status,
     geometry_diameter,geometry_radius,geometry_length, geometry_degree, geometry_thickness,
-    machine, type, work_material, purchase_request
+    machine, type, work_material, purchase_request, count(*) OVER() AS total_contraptions_found
     FROM contraption
     ${whereClause}
     ${materialSearch}
@@ -229,7 +242,8 @@ router.get('/contraptions', function(req, res, next) {
     ${idCodeSearch}
     ${textSearch  }
     ORDER BY contraption_id ASC
-    LIMIT 25
+    LIMIT ${itemForPage}
+    OFFSET ${offset}
     ;`;
 
   }
@@ -239,7 +253,7 @@ router.get('/contraptions', function(req, res, next) {
     .then(function(dbRes) {
       console.log('funzia')
       console.log(sqlQuery);
-      data.data = data.data.concat(parseContraption(dbRes));
+      data.data = data.data.concat(parseContraption(dbRes,currentPage));
       res.send(data);
     })
     .catch(function(error) {
