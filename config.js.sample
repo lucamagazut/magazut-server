@@ -18,6 +18,7 @@ app.email_credential = {
         pass: ''
     }
   },
+  reference: '',
   mailOptions: {
     to: '',
     subject: ''
