@@ -206,6 +206,7 @@ router.get('/contraptions', function(req, res, next) {
         WHERE order_status!=1
         AND order_status!=5
         AND is_deleted = FALSE
+        ORDER BY geometry_diameter ASC
         LIMIT ${itemForPage}
         OFFSET ${offset}
         `;
@@ -241,7 +242,7 @@ router.get('/contraptions', function(req, res, next) {
     ${diameterSearch}
     ${idCodeSearch}
     ${textSearch  }
-    ORDER BY contraption_id ASC
+    ORDER BY geometry_diameter ASC
     LIMIT ${itemForPage}
     OFFSET ${offset}
     ;`;
