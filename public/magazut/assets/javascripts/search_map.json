@@ -8,7 +8,7 @@
     "contraption_type":[
       {
         "name":"punte",
-        "tokens":["punta"],
+        "tokens":["punta","punte"],
         "id":[4,5,6,7],
         "subtypes":[
           {
@@ -36,7 +36,7 @@
       {
         "name":"frese",
         "id":[8,9,10,11,12],
-        "tokens":["fresa"],
+        "tokens":["fresa", "frese"],
         "subtypes":[
           {
             "name": "inserti",

@@ -12,10 +12,10 @@ var illecitPost = function(queryObj){
 console.log('RITORNA2');
     return true;
   }
-  if(!queryObj.attributes.purchaseRequest || queryObj.attributes.purchaseRequest.replace(/\s/g, '') === ''){
-console.log('RITORNA3');
-    return true;
-  }
+//   if(!queryObj.attributes.purchaseRequest || queryObj.attributes.purchaseRequest.replace(/\s/g, '') === ''){
+// console.log('RITORNA3');
+//     return true;
+//   }
   return false;
 };
 
