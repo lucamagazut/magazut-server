@@ -11,7 +11,10 @@ LEGENDA
 5 - dismesso (non verrà più aggiornato lo stato o richiesto l'acquisto)
 */
 
-app.sendMail = function(order_status){
+app.sendMail = function(order_status, available_qt, minimum_qt){
+  if(Number(minimum_qt) === 0){
+    return false;
+  }
   return order_status == 0 || order_status == 2;
 };
 

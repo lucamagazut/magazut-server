@@ -32,9 +32,9 @@ var mailMiddle = function(req, res, next){
 
   var createMessage = function(id_code, denomination, available_qt, purchase_request){
     let message = `
-      Il prodotto [${denomination}] id-code=[${id_code}] è esaurito o sta per esaurirsi.
-      La quantità attuale è [${available_qt}].
-      Si prega di ordinare [${purchase_request}].
+      Il prodotto "${denomination}" id-code "${id_code}" è esaurito o sta per esaurirsi.
+      La quantità attuale è ${available_qt}.
+      Si prega di ordinare ${purchase_request}.
 
 
       ------------------------------------------------
@@ -51,6 +51,7 @@ var mailMiddle = function(req, res, next){
   };
 
   req.sendOrderMail = function(id_code, denomination, available_qt, purchase_request){
+    console.log('dentro app.js sendOrderMail');
     mailOptions.text = createMessage(id_code, denomination, available_qt, purchase_request);
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
