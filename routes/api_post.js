@@ -57,7 +57,7 @@ var getSqlVars = function(paramsObj){
   sqlVars.push(paramsObj.attributes.machine);
   sqlVars.push(paramsObj.attributes.material);
   sqlVars.push(paramsObj.attributes.idCode);
-  sqlVars.push(paramsObj.attributes.purchaseRequest);
+  sqlVars.push(paramsObj.attributes.purchaseRequest || '');
   sqlVars.push(availableQt);
   sqlVars.push(minQt);
   sqlVars.push(orderStatus);

@@ -8,7 +8,7 @@ LEGENDA
 2 - in esaurimento (qt > 0 ma < di min)
 3 - Ordinato (ordinato ai fornitori ma non ancora arrivato)
 4 - arrivato (arrivato dai fornitori ma NON inserito nel db)
-5 - dismesso (non verrà più aggiornato lo stato o richiesto l'acquisto)
+5 - !!! ELIMINATO, non necessario, minqt==0 significa dismesso !!! dismesso (non verrà più aggiornato lo stato o richiesto l'acquisto)
 */
 
 app.sendMail = function(order_status, available_qt, minimum_qt){
@@ -25,7 +25,7 @@ app.changeNewStatus = function(availableQt, minQt, currentOrderStatus, newOrderS
   availableQt = Number(availableQt);
   newOrderStatus = Number(newOrderStatus);
 
-  if(newOrderStatus == 3 || newOrderStatus == 4 || newOrderStatus == 5 ){
+  if(newOrderStatus == 3 || newOrderStatus == 4 ){
     return newOrderStatus;
   }
   else if(newOrderStatus == 0){
@@ -59,10 +59,10 @@ app.getNewState = function(availableQt, minQt, currentOrderStatus, addingQt){
   // console.log('minQt '+ minQt);
   // console.log('addingQt '+ addingQt);
 
-  if(currentOrderStatus == 5){
-    return currentOrderStatus; //dismesso rimane dismesso
-  }
-  else if((currentOrderStatus == 3 || currentOrderStatus == 4) && !isCharging){
+  // if(currentOrderStatus == 5){
+  //   return currentOrderStatus; //dismesso rimane dismesso
+  // }
+  if((currentOrderStatus == 3 || currentOrderStatus == 4) && !isCharging){
     console.log('getNewState 1');
     // se arrivato o ordinato e scarico, lo stato rimane su ordinato o arrivato
     return currentOrderStatus; //arrivato o ordinato

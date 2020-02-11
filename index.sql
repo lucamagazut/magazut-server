@@ -171,7 +171,9 @@ values
 ('Punta HSS d13','PHSS-d13',4,1,1,'',0,1,0,13)
 
 
+update contraption set order_status=0 where order_status=5
 
+delete from order_status where order_status_id=5
 
 
 

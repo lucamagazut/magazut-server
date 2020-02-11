@@ -32,7 +32,7 @@ router.put(['/charge', '/discharge'], function(req, res, next) {
         let newState = orderManager.getNewState(item.available_qt, item.minimum_qt, item.order_status, contraptionQtToAdd);
         let newQt = item.available_qt + contraptionQtToAdd;
         let updateQuery = `UPDATE contraption SET available_qt = $1, order_status = $2
-          WHERE contraption_id = $3 RETURNING contraption_id, denomination, id_code, purchase_request, available_qt, minimum_qt, order_status`;
+          WHERE contraption_id = $3 RETURNING contraption_id, denomination, id_code, available_qt, minimum_qt, order_status`;
 
         lastSqlQuery = updateQuery;
         return t.one(updateQuery, [newQt, newState, contraptionId]);

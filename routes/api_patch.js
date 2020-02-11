@@ -13,7 +13,7 @@ var parseSingleContraption = function(singleRecord){
         type: singleRecord.type,
         material:singleRecord.work_material,
         machine: singleRecord.machine,
-        purchaseRequest: singleRecord.purchase_request,
+        purchaseRequest: singleRecord.purchase_request || '',
         order_status: singleRecord.order_status,
         availableQt: singleRecord.available_qt,
         minQt: singleRecord.minimum_qt,

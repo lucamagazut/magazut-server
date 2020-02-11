@@ -74,7 +74,7 @@ var parseContraption = function(data, pagination){
         type: element.type,
         material:element.work_material,
         machine: element.machine,
-        purchaseRequest: element.purchase_request,
+        purchaseRequest: element.purchase_request || '',
         order_status: element.order_status,
         availableQt: element.available_qt,
         minQt: element.minimum_qt,
@@ -204,7 +204,7 @@ router.get('/contraptions', function(req, res, next) {
       sqlQuery = `SELECT *, count(*) OVER() AS total_contraptions_found
         FROM contraption
         WHERE order_status!=1
-        AND order_status!=5
+        AND minimum_qt>0
         AND is_deleted = FALSE
         ORDER BY geometry_diameter ASC
         LIMIT ${itemForPage}

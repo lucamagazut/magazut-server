@@ -34,7 +34,7 @@ var mailMiddle = function(req, res, next){
     let message = `
       Il prodotto "${denomination}" id-code "${id_code}" è esaurito o sta per esaurirsi.
       La quantità attuale è ${available_qt}.
-      Si prega di ordinare ${purchase_request}.
+      Si prega di ordinare.
 
 
       ------------------------------------------------
