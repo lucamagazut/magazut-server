@@ -193,11 +193,19 @@ router.get('/contraptions', function(req, res, next) {
   let data = {data:[]};
   var sqlQuery = '';
   let itemForPage = queryRequest.items || 25;
-  let currentPage = queryRequest.page;
-  let offset = itemForPage ? itemForPage * currentPage : 0;
+  let currentPage = queryRequest.page || 0;
+  let offset =  itemForPage * currentPage;
 
   if(queryRequest.c_id){
     sqlQuery = `SELECT * FROM contraption WHERE contraption_id=${queryRequest.c_id}`;
+  }
+  else if(queryRequest['id-code']){
+    sqlQuery = `SELECT * FROM contraption
+      WHERE contraption.id_code LIKE '%${queryRequest["id-code"]}%'
+      ORDER BY geometry_diameter ASC
+      LIMIT ${itemForPage}
+      OFFSET ${offset}
+    `;
   }
   else if(queryRequest.filter){
     if(queryRequest.filter == 'runout'){
@@ -220,7 +228,6 @@ router.get('/contraptions', function(req, res, next) {
     let materialSearch = queryRequest['material'] ? ` AND material = ${queryRequest['material']}` : '';
     let typeSearch = queryRequest['contraption_type'] ? ` AND type IN (${queryRequest['contraption_type']})` : '';
     let machineSearch = queryRequest['machine'] ? ` AND machine IN (${queryRequest['machine']})` : '';
-    let idCodeSearch = queryRequest['id-code'] ? ` AND contraption.id_code LIKE '%${queryRequest["id-code"]}%'`: '';
     let textSearch = queryRequest['text'] ? ` AND contraption.denomination LIKE '%${queryRequest["text"]}%'`: '';
     let orderStatusSearch = queryRequest['order_status'] ? ` AND order_status = ${queryRequest['order_status']}` : '';
 
@@ -240,8 +247,7 @@ router.get('/contraptions', function(req, res, next) {
     ${thicknessSearch}
     ${lengthSearch}
     ${diameterSearch}
-    ${idCodeSearch}
-    ${textSearch  }
+    ${textSearch}
     ORDER BY geometry_diameter ASC
     LIMIT ${itemForPage}
     OFFSET ${offset}
