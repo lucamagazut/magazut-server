@@ -4,6 +4,10 @@
     "token":"{c_id=[0-9]+",
     "id":"c_id"
   },
+  "id-code":{
+    "name":"code_id filter",
+    "tokens":["FHM-N","FHM-M","FHM4T","MHSS","MP","PHMF","PHM","PHSS"]
+  },
   "filters":{
     "contraption_type":[
       {
