@@ -29,6 +29,7 @@ var getSqlQuery = function(){
       id_code,
       purchase_request,
       available_qt,
+      borrowed_qt,
       minimum_qt,
       order_status,
       geometry_diameter,
@@ -36,8 +37,8 @@ var getSqlQuery = function(){
       geometry_radius,
       geometry_thickness,
       geometry_degree
-    ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
-      RETURNING contraption_id,order_status,denomination,available_qt,purchase_request,id_code
+    ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+      RETURNING contraption_id,order_status,denomination,available_qt, borrowed_qt,purchase_request,id_code
       `;
 
       return sqlQuery;
@@ -47,10 +48,9 @@ var getSqlQuery = function(){
 var getSqlVars = function(paramsObj){
   var sqlVars = [];
   let availableQt = Number(paramsObj.attributes.availableQt);
+  let borrowed_qt = Number(paramsObj.attributes.borrowed_qt);
   let minQt = Number(paramsObj.attributes.minQt);
-  let orderStatus = orderManager.getNewState(availableQt, minQt, 0, 0);
-
-
+  let orderStatus = orderManager.getNewState(1, availableQt, minQt, borrowed_qt);
 
   sqlVars.push(paramsObj.attributes.denomination);
   sqlVars.push(paramsObj.attributes.type);
@@ -59,6 +59,7 @@ var getSqlVars = function(paramsObj){
   sqlVars.push(paramsObj.attributes.idCode);
   sqlVars.push(paramsObj.attributes.purchaseRequest || '');
   sqlVars.push(availableQt);
+  sqlVars.push(borrowed_qt);
   sqlVars.push(minQt);
   sqlVars.push(orderStatus);
   sqlVars.push(paramsObj.attributes['ut-dia']);

@@ -176,16 +176,62 @@ update contraption set order_status=0 where order_status=5
 delete from order_status where order_status_id=5
 
 
+	insert into order_status (order_status_id, order_status_name)
+	values (5,'Imprestato / in affilatura');
+
+
+	insert into contraption (
+	  denomination,
+		id_code,
+	  type,
+	  machine,
+	  work_material,
+	  purchase_request,
+	  available_qt,
+	  minimum_qt,
+	  order_status,
+	  geometry_diameter
+	)
+	values
+	('Fresa metallo duro d1','FHM-P-d1',9,2,1,'',0,1,0,1),
+	('Fresa metallo duro d3','FHM-P-d3',9,2,1,'',0,1,0,3),
+	('Fresa metallo duro d4','FHM-P-d4',9,2,1,'',0,1,0,4),
+	('Fresa metallo duro d5','FHM-P-d5',9,2,1,'',0,1,0,5),
+	('Fresa metallo duro d6','FHM-P-d6',9,2,1,'',0,1,0,6),
+	('Fresa metallo duro d8','FHM-P-d8',9,2,1,'',0,1,0,8),
+	('Fresa metallo duro d10','FHM-P-d10',9,2,1,'',0,1,0,10),
+	('Fresa metallo duro d12','FHM-P-d12',9,2,1,'',0,1,0,12),
+	('Fresa metallo duro d16','FHM-P-d16',9,2,1,'',0,1,0,16),
+
+	('Fresa metallo duro d1 per inox','FHM-M-d1',9,2,1,'',0,1,0,1),
+	('Fresa metallo duro d3 per inox','FHM-M-d3',9,2,1,'',0,1,0,3),
+	('Fresa metallo duro d4 per inox','FHM-M-d4',9,2,1,'',0,1,0,4),
+	('Fresa metallo duro d5 per inox','FHM-M-d5',9,2,1,'',0,1,0,5),
+	('Fresa metallo duro d6 per inox','FHM-M-d6',9,2,1,'',0,1,0,6),
+	('Fresa metallo duro d8 per inox','FHM-M-d8',9,2,1,'',0,1,0,8),
+	('Fresa metallo duro d10 per inox','FHM-M-d10',9,2,1,'',0,1,0,10),
+	('Fresa metallo duro d12 per inox','FHM-M-d12',9,2,1,'',0,1,0,12),
+	('Fresa metallo duro d16 per inox','FHM-M-d16',9,2,1,'',0,1,0,16),
 
 
 
 
+	ALTER TABLE contraption
+	ADD COLUMN borrowed_qt INTEGER DEFAULT 0,
 
 
 
+	INSERT INTO employee (employee_id, name, second_name)
+	values
+	(1000, 'Affilatura', '')
 
+	INSERT INTO transaction (transaction_type, description)
+	values
+	('borrowing', 'Quando un aggeggio viene prestato')
 
-
+	INSERT INTO transaction (transaction_type, description)
+	values
+	('returning', 'Quando un aggeggio viene ritornato')
 
 
 

@@ -16,6 +16,7 @@ var parseSingleContraption = function(singleRecord){
         purchaseRequest: singleRecord.purchase_request || '',
         order_status: singleRecord.order_status,
         availableQt: singleRecord.available_qt,
+        borrowed_qt: singleRecord.borrowed_qt,
         minQt: singleRecord.minimum_qt,
         "ut-long": singleRecord.geometry_length,
         "ut-thick": singleRecord.geometry_thickness,
@@ -43,18 +44,20 @@ router.patch('/contraptions/:id', function(req, res, next) {
     SET denomination=$1,
     type=$2, machine=$3,
     work_material=$4, id_code=$5,
-    available_qt=$6, minimum_qt=$7,
+    available_qt=$6,
+    minimum_qt=$7,
     order_status=$8,
     geometry_diameter=$9,
     geometry_radius=$10,
     geometry_length=$11,
     geometry_degree=$12,
     geometry_thickness=$13,
-    purchase_request=$14
-    WHERE contraption_id=$15
+    purchase_request=$14,
+    borrowed_qt=$15
+    WHERE contraption_id=$16
     RETURNING *`;
 
-  newState = orderManager.getNewState(queryRequest.availableQt, queryRequest.minQt, queryRequest.order_status, 0);
+  newState = orderManager.getNewState(1, queryRequest.availableQt, queryRequest.minQt, queryRequest.borrowed_qt);
   console.log('@#@#@#@#@#');
   console.log(newState);
 
@@ -73,22 +76,13 @@ router.patch('/contraptions/:id', function(req, res, next) {
     queryRequest['ut-deg'],
     queryRequest['ut-thick'],
     queryRequest.purchaseRequest,
+    queryRequest.borrowed_qt,
     contraptionId
   ];
 
-
-  console.log('updateQuery');
-  console.log(updateQuery);
-console.log('updateQUeryParam');
-  console.log(updateQUeryParam);
   req.magazutDb.one(updateQuery, updateQUeryParam)
       .then(function(item) {
-          console.log('@@@@@ entra ok');
-          console.log(item);
           history.addModifyRecord(req, contraptionId,updateQUeryParam);
-          if(orderManager.sendMail(item.order_status)){
-            req.sendOrderMail(item.id_code, item.denomination, item.available_qt, item.purchase_request);
-          }
           newData.data = parseSingleContraption(item);
           res.send(newData);
       })

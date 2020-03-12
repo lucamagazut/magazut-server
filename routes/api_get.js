@@ -78,6 +78,7 @@ var parseContraption = function(data, pagination){
         order_status: element.order_status,
         availableQt: element.available_qt,
         minQt: element.minimum_qt,
+        borrowed_qt: element.borrowed_qt,
         total_contraptions_found: element.total_contraptions_found || 1,
         pagination:pagination || 0,
         "ut-long": element.geometry_length,
@@ -233,7 +234,7 @@ router.get('/contraptions', function(req, res, next) {
 
     let whereClause = ' WHERE is_deleted = FALSE ';
 
-    sqlQuery = `SELECT contraption_id, denomination, id_code, available_qt, minimum_qt, order_status,
+    sqlQuery = `SELECT contraption_id, denomination, id_code, available_qt, borrowed_qt, minimum_qt, order_status,
     geometry_diameter,geometry_radius,geometry_length, geometry_degree, geometry_thickness,
     machine, type, work_material, purchase_request, count(*) OVER() AS total_contraptions_found
     FROM contraption

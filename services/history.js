@@ -13,11 +13,11 @@ function getQueryArray(queryObj){
 }
 
 var app = {
-  addChargingRecord(req){
+  addChargingRecord(req, isReturned){
     const queryRequest = req.query;
 
     const operator = queryRequest.op || 0;
-    const transaction_id = 1;
+    const transaction_id = isReturned ? 7 : 1;
     const contraption_id = queryRequest.id;
     const involved_quantity = queryRequest.qt;
     const http_app_location = {"url":req.header('Referer')};
@@ -36,11 +36,11 @@ var app = {
       });
 
   },
-  addUnchargingRecord(req){
+  addUnchargingRecord(req, isBorrowed){
     const queryRequest = req.query;
 
     const operator = queryRequest.op || 0;
-    const transaction_id = 2;
+    const transaction_id = isBorrowed ? 6 : 2;
     const contraption_id = queryRequest.id;
     const involved_quantity = queryRequest.qt;
     const http_app_location = {"url":req.header('Referer')};
