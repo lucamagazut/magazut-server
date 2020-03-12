@@ -215,31 +215,17 @@ delete from order_status where order_status_id=5
 
 
 
-
 	ALTER TABLE contraption
-	ADD COLUMN borrowed_qt INTEGER DEFAULT 0,
-
-
+	ADD COLUMN borrowed_qt INTEGER DEFAULT 0;
 
 	INSERT INTO employee (employee_id, name, second_name)
 	values
-	(1000, 'Affilatura', '')
+	(1000, 'Affilatura', '');
 
 	INSERT INTO transaction (transaction_type, description)
 	values
-	('borrowing', 'Quando un aggeggio viene prestato')
+	('borrowing', 'Quando un aggeggio viene prestato');
 
 	INSERT INTO transaction (transaction_type, description)
 	values
-	('returning', 'Quando un aggeggio viene ritornato')
-
-
-
-
-
-
-
-
-
-
-;
+	('returning', 'Quando un aggeggio viene ritornato');

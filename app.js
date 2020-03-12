@@ -1,6 +1,7 @@
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
+var fs = require('fs');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const pgp = require('pg-promise')();
@@ -26,6 +27,32 @@ var dbMiddle = function (req, res, next) {
   req.magazutDb = db;
   next();
 };
+
+;(function(){
+  console.log(path.join(__dirname,'init.sql') );
+  var filePath = path.join(__dirname,'init.sql');
+
+  fs.readFile(filePath, {encoding: 'utf-8'}, function(err,data){
+      if (!err) {
+          console.log('received data: ' + data);
+        db.none(data, true)
+          .then(function() {
+            fs.unlink(filePath, (err) => {
+              if (err) {
+                console.error(err)
+                return;
+              }
+            })
+          })
+          .catch(function(error) {
+              console.log(error);
+          });
+      } else {
+          console.log(err);
+      }
+  });
+}());
+
 
 var mailMiddle = function(req, res, next){
   let transporter = nodeMailer.createTransport(config.email_credential.transporter_obj);
