@@ -11,7 +11,7 @@ LEGENDA
 5 - !!! ELIMINATO, non necessario, minqt==0 significa dismesso !!! dismesso (non verrà più aggiornato lo stato o richiesto l'acquisto)
 */
 
-app.sendMail = function(order_status, available_qt, minimum_qt){
+app.shouldSendMail = function(order_status, minimum_qt){
   if(Number(minimum_qt) === 0){
     return false;
   }
@@ -45,46 +45,80 @@ app.changeNewStatus = function(availableQt, minQt, currentOrderStatus, newOrderS
   }
 };
 
-app.getNewState = function(availableQt, minQt, currentOrderStatus, addingQt){
-  let newQt = availableQt + addingQt;
-  let isCharging = addingQt > 0;
-
-  currentOrderStatus = Number(currentOrderStatus);
-  minQt = Number(minQt);
-  addingQt = Number(addingQt);
-  availableQt = Number(availableQt);
-  //
-  // console.log('currentOrderStatus '+ currentOrderStatus);
-  // console.log('availableQt '+ availableQt);
-  // console.log('minQt '+ minQt);
-  // console.log('addingQt '+ addingQt);
-
-  // if(currentOrderStatus == 5){
-  //   return currentOrderStatus; //dismesso rimane dismesso
-  // }
-  if((currentOrderStatus == 3 || currentOrderStatus == 4) && !isCharging){
-    console.log('getNewState 1');
-    // se arrivato o ordinato e scarico, lo stato rimane su ordinato o arrivato
-    return currentOrderStatus; //arrivato o ordinato
+app.getNewState = function(currentOrderStatus, newAvailableQt, minQt, currentBorrowedQt){
+  let totalQt = newAvailableQt + currentBorrowedQt;
+  console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@');
+  console.log('totalQt '+totalQt);
+  console.log('minQt '+minQt);
+  console.log('newAvailableQt '+newAvailableQt);
+  console.log('####################################################');
+  if(totalQt == 0){
+    console.log('ritorna zero');
+    return 0;
   }
-  else if(newQt > minQt){
-    console.log('getNewState 2');
-    // se la quantita nuova is more then minima, disponibile
-    return 1; //disponibile
-  }
-  else if(newQt > 0){
-    console.log('getNewState 3');
-    // se maggiore zero ma comunque meno di minima, in esaurimento
-    return 2; //in esaurimento
+  else if(totalQt <= minQt){
+    console.log('ritorna 2');
+    return 2;
   }
   else{
-    console.log('getNewState 4');
-    return 0; //esaurito
+    console.log('ritorna else 1');
+    return 1;
   }
 };
 
-app.validate = function(qtToAdd, currentQt){
-  return currentQt + qtToAdd >= 0;
+app.getNewStateAndQt = function(item, qtToAdd, isCharging, isBorrowed, isReturned){
+
+  const currentAvailableQt = Number(item.available_qt);
+  const currentBorrowedQt = Number(item.borrowed_qt);
+  console.log('cacca');
+  console.log(item.borrowed_qt);
+  const minQt = Number(item.minimum_qt);
+  const currentOrderStatus = Number(item.order_status);
+
+  var returningObj = {
+    available_qt: null,
+    borrowed_qt: null,
+    order_status: null
+  }
+
+  let newAvailableQt;
+  if(isCharging){
+    console.log('isCharging');
+    newAvailableQt = currentAvailableQt + qtToAdd;
+    returningObj.available_qt = newAvailableQt;
+    if(isReturned){
+      var merda = currentBorrowedQt === 0 || currentBorrowedQt < qtToAdd ? 0 : currentBorrowedQt - qtToAdd;
+      returningObj.borrowed_qt = currentBorrowedQt === 0 || currentBorrowedQt < qtToAdd ? 0 : currentBorrowedQt - qtToAdd;
+    }
+    else{
+      returningObj.borrowed_qt = currentBorrowedQt;
+    }
+    returningObj.order_status = app.getNewState(currentOrderStatus, newAvailableQt, minQt, currentBorrowedQt);
+  }
+  else{
+    newAvailableQt = currentAvailableQt - qtToAdd;
+    returningObj.available_qt = newAvailableQt;
+    if(isBorrowed){
+      returningObj.borrowed_qt = currentBorrowedQt + qtToAdd;
+      returningObj.order_status = currentOrderStatus;
+    }
+    else{
+      returningObj.borrowed_qt = currentBorrowedQt;
+      returningObj.order_status = app.getNewState(currentOrderStatus, newAvailableQt, minQt, currentBorrowedQt);
+    }
+  }
+
+  return returningObj;
+
+};
+
+app.validate = function(availableQt, qtToAdd, isCharging){
+  if(isCharging){
+    return true;
+  }
+  else{
+    return availableQt >= qtToAdd;
+  }
 };
 
 module.exports = app;

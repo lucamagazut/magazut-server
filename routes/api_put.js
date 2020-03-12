@@ -8,8 +8,10 @@ router.put(['/charge', '/discharge'], function(req, res, next) {
   const queryRequest = req.query;
   const contraptionId = queryRequest.id;
   const operator = queryRequest.op;
+  const isBorrowed = queryRequest.is_borrowed == 'true';
+  const isReturned = queryRequest.is_returned == 'true';
   const isCharging = req.path === '/charge';
-  const contraptionQtToAdd =  isCharging ? Number(queryRequest.qt) : -(Number(queryRequest.qt));
+  const qtToAdd =  Number(queryRequest.qt);
   var newData = {data:[]};
   var newObjContraction = {
     id:contraptionId,
@@ -19,39 +21,43 @@ router.put(['/charge', '/discharge'], function(req, res, next) {
   var lastSqlQuery = '';
 
   newData.data.push(newObjContraction);
-  var sqlQuerySelect = `SELECT minimum_qt, available_qt, order_status FROM contraption WHERE contraption_id = $1`;
+  var sqlQuerySelect = `SELECT minimum_qt, available_qt, borrowed_qt, order_status FROM contraption WHERE contraption_id = $1`;
   lastSqlQuery = sqlQuerySelect;
   console.log(sqlQuerySelect)
   req.magazutDb.task(t => {
     return t.one(sqlQuerySelect, [contraptionId])
       .then(item => {
-        if(!orderManager.validate(item.available_qt, contraptionQtToAdd)){
+        if(!orderManager.validate(item.available_qt, qtToAdd, isCharging)){
           console.log('entra qui');
           throw {name:'error',type:'invalidRequest'};
         }
-        let newState = orderManager.getNewState(item.available_qt, item.minimum_qt, item.order_status, contraptionQtToAdd);
-        let newQt = item.available_qt + contraptionQtToAdd;
-        let updateQuery = `UPDATE contraption SET available_qt = $1, order_status = $2
-          WHERE contraption_id = $3 RETURNING contraption_id, denomination, id_code, available_qt, minimum_qt, order_status`;
+
+        console.log(item);
+
+        let newStateAndQt = orderManager.getNewStateAndQt(item, qtToAdd, isCharging, isBorrowed, isReturned);
+
+        let updateQuery = `UPDATE contraption SET available_qt = $1, borrowed_qt=$2, order_status = $3
+          WHERE contraption_id = $4 RETURNING contraption_id, denomination, id_code, available_qt, minimum_qt, borrowed_qt, order_status`;
 
         lastSqlQuery = updateQuery;
-        return t.one(updateQuery, [newQt, newState, contraptionId]);
+        return t.one(updateQuery, [newStateAndQt.available_qt, newStateAndQt.borrowed_qt, newStateAndQt.order_status, contraptionId]);
       });
     })
     .then(item => {
       newObjContraction.attributes.availableQt = item.available_qt;
+      newObjContraction.attributes.borrowed_qt = item.borrowed_qt;
       newObjContraction.attributes.order_status = item.order_status;
 
-      if(orderManager.sendMail(item.order_status, item.available_qt, item.minimum_qt)){
+      if(orderManager.shouldSendMail(item.order_status, item.minimum_qt)){
         req.sendOrderMail(item.id_code, item.denomination, item.available_qt, item.purchase_request);
       }
 
       if(isCharging){
-        console.log(213293129);
-        history.addChargingRecord(req);
+        console.log('addChargingRecord');
+        history.addChargingRecord(req, isReturned);
       }else{
-        console.log(98738383);
-        history.addUnchargingRecord(req);
+        console.log('addUnchargingRecord');
+        history.addUnchargingRecord(req, isBorrowed);
       }
       res.send(newData);
     })
@@ -75,13 +81,11 @@ router.put('/order', function(req, res, next) {
     return t.one(`SELECT minimum_qt, available_qt, order_status FROM contraption WHERE contraption_id = $1`, [contraptionId])
       .then(item => {
         newOrderStatus = orderManager.changeNewStatus(item.available_qt, item.minQt, item.order_status, order_status);
-        console.log('@@@@@@@@@@@@ newOrderStatus @@@@@@@@@@@');
-        console.log(newOrderStatus);
         return t.one('UPDATE contraption SET order_status=$2 WHERE contraption_id=$1 RETURNING *', [contraptionId, newOrderStatus]);
       });
     })
     .then((item) => {
-      if(orderManager.sendMail(newOrderStatus)){
+      if(orderManager.shouldSendMail(item.order_status, item.minimum_qt)){
         req.sendOrderMail(item.id_code, item.denomination, item.available_qt, item.purchase_request);
       }
       history.addModifyRecord(req, contraptionId, {order_status:newOrderStatus});
