@@ -45,10 +45,10 @@ var dbMiddle = function (req, res, next) {
             })
           })
           .catch(function(error) {
-              console.log(error);
+            // no need error
           });
       } else {
-          console.log(err);
+        // no need error
       }
   });
 }());

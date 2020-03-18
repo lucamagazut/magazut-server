@@ -212,7 +212,7 @@ router.get('/contraptions', function(req, res, next) {
     if(queryRequest.filter == 'runout'){
       sqlQuery = `SELECT *, count(*) OVER() AS total_contraptions_found
         FROM contraption
-        WHERE order_status!=1
+        WHERE (order_status = 0 OR order_status = 2)
         AND minimum_qt>0
         AND is_deleted = FALSE
         ORDER BY geometry_diameter ASC
