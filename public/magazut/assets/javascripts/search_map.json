@@ -38,6 +38,23 @@
         ]
       },
       {
+        "name":"maschi",
+        "tokens":["maschio","maschi"],
+        "id":[14,15],
+        "subtypes":[
+          {
+            "name":"manuale",
+            "id":[14],
+            "tokens":["mano","manuale"]
+          },
+          {
+            "name":"macchina",
+            "id":[15],
+            "tokens":["macchina","rivestito","centro"]
+          }
+        ]
+      },
+      {
         "name":"frese",
         "id":[8,9,10,11,12],
         "tokens":["fresa", "frese"],
@@ -214,7 +231,7 @@
     "geometry_diameter":{
       "name":"Geometria-diametro",
       "tokens":[
-        "(d{1}|dia{1}|diametro{1})[ ]*[0-9,.]+([ ]|$|mm)"
+        "(d{1}|dia{1}|diametro{1}|m)[ ]*[0-9,.]+([ ]|$|mm)"
       ]
     }
   }
