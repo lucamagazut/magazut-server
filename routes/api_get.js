@@ -136,7 +136,7 @@ var parseUnloadingHistory = function(data){
 };
 
 router.get('/operators', function(req, res, next) {
-  req.magazutDb.any('SELECT * FROM employee', [true])
+  req.magazutDb.any('SELECT * FROM employee ORDER BY second_name ASC', [true])
       .then(function(data) {
           res.send(parseOperator(data));
       })
@@ -288,7 +288,7 @@ router.get('/unloading-histories', function(req, res, next) {
     FROM history LEFT JOIN employee ON (user_id = employee_id) LEFT JOIN contraption ON (history.contraption_id = contraption.contraption_id)
 
     WHERE transaction_id=2
-    ORDER BY history_event_id ASC
+    ORDER BY history_event_id DESC
     LIMIT $2
     OFFSET $1`;
 
