@@ -126,6 +126,7 @@ var parseStatus = function(data){
 var parseUnloadingHistory = function(data){
   let newData = [];
   data.forEach((element,index) => {
+    delete element.result_qt;
     newData.push({
       id: index,
       type:"unloading-history",
@@ -271,6 +272,17 @@ router.get('/contraptions', function(req, res, next) {
     });
 });
 
+var addPagination = function(data, result_qt, limit, pageQuery){
+  data.push({
+    id:0,
+    type:"pagination",
+    attributes:{
+      current_page:pageQuery,
+      total_pages: result_qt && result_qt > 0 ? Math.ceil(result_qt / limit) : 0,
+      item_for_page:limit
+    }
+  });
+};
 
 router.get('/unloading-histories', function(req, res, next) {
   const queryRequest = req.query;
@@ -283,7 +295,8 @@ router.get('/unloading-histories', function(req, res, next) {
     http_app_location, http_api_location, log, employee.name AS employee_name,
     employee.second_name AS employee_second_name,
     contraption.denomination AS contraption_denomination,
-    contraption.id_code AS contraption_id_code
+    contraption.id_code AS contraption_id_code,
+    count(*) OVER() AS result_qt
 
     FROM history LEFT JOIN employee ON (user_id = employee_id) LEFT JOIN contraption ON (history.contraption_id = contraption.contraption_id)
 
@@ -296,6 +309,7 @@ router.get('/unloading-histories', function(req, res, next) {
 
   req.magazutDb.any(sqlQuery, [offset, limit])
     .then(function(dbRes) {
+      addPagination(data.data, dbRes[0].result_qt, limit, pageQuery);
       data.data = data.data.concat(parseUnloadingHistory(dbRes));
       res.send(data);
     })
