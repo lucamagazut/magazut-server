@@ -12,9 +12,14 @@
     "contraption_type":[
       {
         "name":"punte",
-        "tokens":["punta","punte"],
+        "tokens":["punta","punte","svasatori","svasatore"],
         "id":[4,5,6,7],
         "subtypes":[
+          {
+            "name":"svasatore",
+            "tokens":["svasatore","svasatori"],
+            "text":["svasatore"]
+          },
           {
             "name":"hss",
             "id":[4],

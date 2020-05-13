@@ -136,6 +136,23 @@ var parseUnloadingHistory = function(data){
   return newData;
 };
 
+
+var getQueryLike = function(queryRequestText){
+  let words = queryRequestText.split(',');
+  let queryLike = '';
+  words.forEach((item, i) => {
+    if(i === 0)
+    {
+      queryLike +=  `AND (LOWER(contraption.denomination) LIKE '%${item}%'`;
+    }
+    else{
+      queryLike +=  ` OR LOWER(contraption.denomination) LIKE '%${item}%'`;
+    }
+  });
+  queryLike+= ')';
+  return queryLike;
+};
+
 router.get('/operators', function(req, res, next) {
   req.magazutDb.any('SELECT * FROM employee ORDER BY second_name ASC', [true])
       .then(function(data) {
@@ -189,7 +206,6 @@ router.get('/contraptions/:id(\\d+)/', function(req, res, next) {
       });
 });
 
-
 router.get('/contraptions', function(req, res, next) {
   const queryRequest = req.query;
   let data = {data:[]};
@@ -230,7 +246,7 @@ router.get('/contraptions', function(req, res, next) {
     let materialSearch = queryRequest['material'] ? ` AND material = ${queryRequest['material']}` : '';
     let typeSearch = queryRequest['contraption_type'] ? ` AND type IN (${queryRequest['contraption_type']})` : '';
     let machineSearch = queryRequest['machine'] ? ` AND machine IN (${queryRequest['machine']})` : '';
-    let textSearch = queryRequest['text'] ? ` AND contraption.denomination LIKE '%${queryRequest["text"]}%'`: '';
+    let textSearch = queryRequest['text'] ? getQueryLike(queryRequest['text']): '';
     let orderStatusSearch = queryRequest['order_status'] ? ` AND order_status = ${queryRequest['order_status']}` : '';
 
     let whereClause = ' WHERE is_deleted = FALSE ';
