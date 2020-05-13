@@ -242,7 +242,7 @@ router.get('/contraptions', function(req, res, next) {
     let degreeSearch = queryRequest['geometry_degree'] ? ` AND geometry_degree = ${queryRequest['geometry_degree']}` : '';
     let thicknessSearch = queryRequest['geometry_thickness'] ? ` AND geometry_thickness = ${queryRequest['geometry_thickness']}` : '';
     let lengthSearch = queryRequest['geometry_length'] ? ` AND geometry_length = ${queryRequest['geometry_length']}` : '';
-    let diameterSearch = queryRequest['geometry_diameter'] ? ` AND geometry_diameter = ${queryRequest['geometry_diameter']}` : '';
+    let diameterSearch = queryRequest['geometry_diameter'] ? ` AND geometry_diameter >= ${queryRequest['geometry_diameter']}` : '';
     let materialSearch = queryRequest['material'] ? ` AND material = ${queryRequest['material']}` : '';
     let typeSearch = queryRequest['contraption_type'] ? ` AND type IN (${queryRequest['contraption_type']})` : '';
     let machineSearch = queryRequest['machine'] ? ` AND machine IN (${queryRequest['machine']})` : '';
