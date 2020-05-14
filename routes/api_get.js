@@ -219,7 +219,8 @@ router.get('/contraptions', function(req, res, next) {
   }
   else if(queryRequest['id-code']){
     sqlQuery = `SELECT * FROM contraption
-      WHERE contraption.id_code LIKE '%${queryRequest["id-code"]}%'
+      WHERE LOWER(contraption.id_code) LIKE LOWER('%${queryRequest["id-code"]}%')
+      AND is_deleted = FALSE
       ORDER BY geometry_diameter ASC
       LIMIT ${itemForPage}
       OFFSET ${offset}
