@@ -8,7 +8,7 @@ LEGENDA
 2 - in esaurimento (qt > 0 ma < di min)
 3 - Ordinato (ordinato ai fornitori ma non ancora arrivato)
 4 - arrivato (arrivato dai fornitori ma NON inserito nel db)
-5 - !!! ELIMINATO, non necessario, minqt==0 significa dismesso !!! dismesso (non verrà più aggiornato lo stato o richiesto l'acquisto)
+5 - dismesso (valore NON impostato da DB. Su db dismesso è min-qt=0. Il valore 5 arriva da una richiesta)
 */
 
 app.shouldSendMail = function(order_status, minimum_qt){
@@ -18,34 +18,45 @@ app.shouldSendMail = function(order_status, minimum_qt){
   return order_status == 0 || order_status == 2;
 };
 
-app.changeNewStatus = function(availableQt, minQt, currentOrderStatus, newOrderStatus){
+app.isDismissing = function (orderStatus) {
+  return Number(orderStatus) === 5;
+};
 
-  currentOrderStatus = Number(currentOrderStatus);
+app.validateChangingStatus = function(availableQt, minQt, newOrderStatus){
+
   minQt = Number(minQt);
   availableQt = Number(availableQt);
   newOrderStatus = Number(newOrderStatus);
 
-  if(newOrderStatus == 3 || newOrderStatus == 4 ){
-    return newOrderStatus;
+
+  if(newOrderStatus === 3 || newOrderStatus === 4 || newOrderStatus === 5 ){
+    return true;
   }
-  else if(newOrderStatus == 0){
+  else if(newOrderStatus === 0){
     if(availableQt > 0){
-      return 2;
+      return false;
     }else{
-      return 0;
+      return true;
+    }
+  }
+  else if(newOrderStatus == 2){
+    if(availableQt > 0){
+      return true;
+    }else{
+      return false;
     }
   }
   else {
-    // if(newOrderStatus == 1 || newOrderStatus == 2)
-    if(availableQt > 0){
-      return newOrderStatus;
+    // if(newOrderStatus == 1)
+    if(availableQt > minQt){
+      return true;
     }else{
-      return 0;
+      return false;
     }
   }
 };
 
-app.getNewState = function(currentOrderStatus, newAvailableQt, minQt, currentBorrowedQt){
+app.getNewState = function(newAvailableQt, minQt, currentBorrowedQt){
   let totalQt = newAvailableQt + currentBorrowedQt;
   console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@');
   console.log('totalQt '+totalQt);
@@ -87,13 +98,12 @@ app.getNewStateAndQt = function(item, qtToAdd, isCharging, isBorrowed, isReturne
     newAvailableQt = currentAvailableQt + qtToAdd;
     returningObj.available_qt = newAvailableQt;
     if(isReturned){
-      var merda = currentBorrowedQt === 0 || currentBorrowedQt < qtToAdd ? 0 : currentBorrowedQt - qtToAdd;
       returningObj.borrowed_qt = currentBorrowedQt === 0 || currentBorrowedQt < qtToAdd ? 0 : currentBorrowedQt - qtToAdd;
     }
     else{
       returningObj.borrowed_qt = currentBorrowedQt;
     }
-    returningObj.order_status = app.getNewState(currentOrderStatus, newAvailableQt, minQt, currentBorrowedQt);
+    returningObj.order_status = app.getNewState(newAvailableQt, minQt, currentBorrowedQt);
   }
   else{
     newAvailableQt = currentAvailableQt - qtToAdd;
@@ -104,7 +114,7 @@ app.getNewStateAndQt = function(item, qtToAdd, isCharging, isBorrowed, isReturne
     }
     else{
       returningObj.borrowed_qt = currentBorrowedQt;
-      returningObj.order_status = app.getNewState(currentOrderStatus, newAvailableQt, minQt, currentBorrowedQt);
+      returningObj.order_status = app.getNewState(newAvailableQt, minQt, currentBorrowedQt);
     }
   }
 

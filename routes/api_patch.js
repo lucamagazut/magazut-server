@@ -57,7 +57,7 @@ router.patch('/contraptions/:id', function(req, res, next) {
     WHERE contraption_id=$16
     RETURNING *`;
 
-  newState = orderManager.getNewState(1, queryRequest.availableQt, queryRequest.minQt, queryRequest.borrowed_qt);
+  newState = orderManager.getNewState(queryRequest.availableQt, queryRequest.minQt, queryRequest.borrowed_qt);
   console.log('@#@#@#@#@#');
   console.log(newState);
 

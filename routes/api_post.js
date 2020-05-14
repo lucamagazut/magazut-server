@@ -50,7 +50,7 @@ var getSqlVars = function(paramsObj){
   let availableQt = Number(paramsObj.attributes.availableQt);
   let borrowed_qt = Number(paramsObj.attributes.borrowed_qt);
   let minQt = Number(paramsObj.attributes.minQt);
-  let orderStatus = orderManager.getNewState(1, availableQt, minQt, borrowed_qt);
+  let orderStatus = orderManager.getNewState(availableQt, minQt, borrowed_qt);
 
   sqlVars.push(paramsObj.attributes.denomination);
   sqlVars.push(paramsObj.attributes.type);

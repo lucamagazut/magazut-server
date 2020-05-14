@@ -75,21 +75,37 @@ router.put('/order', function(req, res, next) {
   const queryRequest = req.query;
   const contraptionId = queryRequest.id;
   const order_status = queryRequest.order_status;
-  var newOrderStatus;
 
   req.magazutDb.task(t => {
-    return t.one(`SELECT minimum_qt, available_qt, order_status FROM contraption WHERE contraption_id = $1`, [contraptionId])
+    return t.one(`SELECT minimum_qt, available_qt, borrowed_qt, order_status FROM contraption WHERE contraption_id = $1`, [contraptionId])
       .then(item => {
-        newOrderStatus = orderManager.changeNewStatus(item.available_qt, item.minQt, item.order_status, order_status);
-        return t.one('UPDATE contraption SET order_status=$2 WHERE contraption_id=$1 RETURNING *', [contraptionId, newOrderStatus]);
+        let newOrderStatus;
+        let sqlQuery = '';
+        if(orderManager.isDismissing(order_status)){
+
+          console.log('dismette');
+          console.log(item.available_qt);
+          console.log(item.minimum_qt);
+          console.log(item.borrowed_qt);
+          newOrderStatus = orderManager.getNewState(item.available_qt,  item.minimum_qt, item.borrowed_qt);
+          sqlQuery = 'UPDATE contraption SET order_status=$2, minimum_qt=0 WHERE contraption_id=$1 RETURNING *';
+        }
+        else if(orderManager.validateChangingStatus(item.available_qt, item.minimum_qt, order_status)){
+          newOrderStatus = order_status;
+          sqlQuery = 'UPDATE contraption SET order_status=$2 WHERE contraption_id=$1 RETURNING *';
+        }
+        else{
+          throw {name:'error',type:'invalidRequest'};
+        }
+        return t.one(sqlQuery, [contraptionId, newOrderStatus]);
       });
     })
     .then((item) => {
       if(orderManager.shouldSendMail(item.order_status, item.minimum_qt)){
         req.sendOrderMail(item.id_code, item.denomination, item.available_qt, item.purchase_request);
       }
-      history.addModifyRecord(req, contraptionId, {order_status:newOrderStatus});
-      res.send({data:{type:'contraption',id:contraptionId,attributes:{order_status:newOrderStatus}}});
+      history.addModifyRecord(req, contraptionId, {order_status:item.order_status});
+      res.send({data:{type:'contraption',id:contraptionId,attributes:{order_status:item.order_status}}});
     })
     .catch(error => {
       console.log('errore');

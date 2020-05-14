@@ -51,7 +51,7 @@
       },
       {
         "name":"maschi",
-        "tokens":["maschio","maschi"],
+        "tokens":["maschio","maschi","maschiatore","maschiatori"],
         "id":[14,15],
         "subtypes":[
           {
@@ -69,7 +69,7 @@
       {
         "name":"frese",
         "id":[8,9,10,11,12],
-        "tokens":["fresa", "frese"],
+        "tokens":["fresa", "frese","piko"],
         "subtypes":[
           {
             "name": "inserti",
