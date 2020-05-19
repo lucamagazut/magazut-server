@@ -67,7 +67,7 @@ app.getNewState = function(newAvailableQt, minQt, currentBorrowedQt){
     console.log('ritorna zero');
     return 0;
   }
-  else if(totalQt <= minQt){
+  else if(totalQt < minQt){
     console.log('ritorna 2');
     return 2;
   }
