@@ -90,6 +90,12 @@ var mailMiddle = function(req, res, next){
   next();
 };
 
+app.use(function (req, res, next) {
+    var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    console.log('ip_user ' + ip);
+    next();
+});
+
 app.use(function(req, res, next) {
   // if(req.app.get('env') == 'development'){
   if(true){
