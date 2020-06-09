@@ -6,7 +6,7 @@
   },
   "id-code":{
     "name":"code_id filter",
-    "tokens":["FHM-N","FHM-M","FHM4T","MHSS","MP","PHMF","PHM","PHSS","PCHSS"]
+    "tokens":["FHM-N","FHM-M","FHM4T","MHSS","MP","PHMF","PHM","PHSS","PCHSS","FHMSG"]
   },
   "filters":{
     "contraption_type":[

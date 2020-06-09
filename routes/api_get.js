@@ -8,7 +8,7 @@ var parseOperator = function(data){
       id: element.employee_id,
       type:"operator",
       attributes:{
-        name: element.name,
+        first_name: element.name,
         surname: element.second_name
       }
     });
@@ -154,11 +154,23 @@ var parseMonthlyHistory = function(data){
   let newData = [];
   let filteredData = {};
 
+  if(data.length === 0){
+    newData.push({
+      id: 0,
+      type:"monthly-history",
+      attributes:{
+        quantity:0
+      }
+    })
+    return newData;
+  }
+
   data.forEach((element,index) => {
     if(!filteredData[element.contraption_id]){
       filteredData[element.contraption_id] = {
         quantity:0,
         contraption_denomination: element.contraption_denomination,
+        contraption_id: element.contraption_id,
         contraption_id_code: element.contraption_id_code,
       };
     }
@@ -178,31 +190,14 @@ var parseMonthlyHistory = function(data){
 
 var parseEmployeeHistory = function(data){
   let newData = [];
-  let filteredData = {};
-
   data.forEach((element,index) => {
-    if(!filteredData[element.contraption_id]){
-      filteredData[element.contraption_id] = {
-        quantity:0,
-        employee_name:element.employee_name,
-        employee_id:element.employee_id,
-        employee_second_name: element.employee_second_name,
-        contraption_denomination: element.contraption_denomination,
-        contraption_id_code: element.contraption_id_code,
-        contraption_id:element.contraption_id
-      };
-    }
-    filteredData[element.contraption_id].quantity += element.quantity;
-    filteredData[element.contraption_id].transaction_time = element.transaction_time;
-  });
-
-  for (const [key, value] of Object.entries(filteredData)) {
+    delete element.result_qt;
     newData.push({
-      id: key,
+      id: index,
       type:"employee-history",
-      attributes:value
+      attributes:element
     });
-  }
+  });
   return newData;
 };
 
@@ -216,6 +211,7 @@ var parseYearHistory = function(data){
         quantity:0,
         contraption_denomination: element.contraption_denomination,
         contraption_id_code: element.contraption_id_code,
+        contraption_id:element.contraption_id
       };
     }
     filteredData[element.contraption_id].quantity += element.quantity;
@@ -225,7 +221,8 @@ var parseYearHistory = function(data){
   for (const [key, value] of Object.entries(filteredData)) {
     newData.push({
       id: key,
-      type:"monthly-history",
+      real_id:key,
+      type:"year-history",
       attributes:value
     });
   }
@@ -249,7 +246,7 @@ var getQueryLike = function(queryRequestText){
 };
 
 router.get('/operators', function(req, res, next) {
-  req.magazutDb.any('SELECT * FROM employee ORDER BY second_name ASC', [true])
+  req.magazutDb.any('SELECT * FROM employee WHERE employee_id!=0 ORDER BY second_name ASC', [true])
       .then(function(data) {
           res.send(parseOperator(data));
       })
@@ -387,7 +384,7 @@ router.get('/contraptions', function(req, res, next) {
     });
 });
 
-var addPagination = function(data, result_qt, limit, pageQuery){
+var addPagination = function(data, result_qt, limit, pageQuery, current_result_qt){
   result_qt = result_qt ? Number(result_qt) : 0;
   limit = Number(limit);
 
@@ -398,7 +395,7 @@ var addPagination = function(data, result_qt, limit, pageQuery){
       current_page:Number(pageQuery),
       total_pages: result_qt > 0 ? Math.ceil(result_qt / limit) : 0,
       items_for_page:limit,
-      items_showed: result_qt < limit ? result_qt : limit,
+      items_showed: current_result_qt || limit,
       total_items:result_qt
     }
   });
@@ -412,8 +409,8 @@ router.get('/unloading-histories', function(req, res, next) {
     if(temp < 1){
       return 1;
     }else{return temp}
-  }()); ;
-  let limit = 15;
+  }());
+  let limit = queryRequest.items_for_page ? Number(queryRequest.items_for_page) : 15;
   var offset = (pageQuery - 1) * limit;
   var sqlQuery = `SELECT
     transaction_time, involved_quantity, history.contraption_id,
@@ -435,7 +432,7 @@ router.get('/unloading-histories', function(req, res, next) {
 
   req.magazutDb.any(sqlQuery, [offset, limit])
     .then(function(dbRes) {
-      addPagination(data.data, dbRes[0].result_qt, limit, pageQuery);
+      addPagination(data.data, dbRes[0].result_qt, limit, pageQuery, dbRes.length);
       data.data = data.data.concat(parseUnloadingHistory(dbRes));
       res.send(data);
     })
@@ -450,12 +447,18 @@ router.get('/unloading-histories', function(req, res, next) {
 router.get('/monthly-histories', function(req, res, next) {
   const queryRequest = req.query;
   let data = {data:[]};
-  let pageQuery= Number(queryRequest.page);
+  let pageQuery = (function(){
+    let temp = queryRequest.page ? Number(queryRequest.page) : 1;
+    if(temp < 1){
+      return 1;
+    }else{return temp}
+  }());
   var sqlQuery = `SELECT
     involved_quantity AS quantity, history.contraption_id,
     contraption.denomination AS contraption_denomination,
     contraption.id_code AS contraption_id_code,
-    transaction_time
+    transaction_time,
+    count(*) OVER() AS result_qt
 
     FROM history LEFT JOIN contraption ON (history.contraption_id = contraption.contraption_id)
 
@@ -465,10 +468,9 @@ router.get('/monthly-histories', function(req, res, next) {
     console.log(sqlQuery);
 
   let currentDate = new Date();
-  currentDate.setMonth(currentDate.getMonth() - pageQuery);
+  currentDate.setMonth(currentDate.getMonth() - (pageQuery-1));
   let currentYear = currentDate.getFullYear();
   let currentMonth = currentDate.getMonth() + 1;
-
 
   currentDate.setMonth(currentDate.getMonth() +1);
   let nextYear = currentDate.getFullYear();
@@ -494,12 +496,18 @@ router.get('/monthly-histories', function(req, res, next) {
 router.get('/year-histories', function(req, res, next) {
   const queryRequest = req.query;
   let data = {data:[]};
-  let pageQuery= Number(queryRequest.page);
+  let pageQuery = (function(){
+    let temp = queryRequest.page ? Number(queryRequest.page) : 1;
+    if(temp < 1){
+      return 1;
+    }else{return temp}
+  }());
   var sqlQuery = `SELECT
     involved_quantity AS quantity, history.contraption_id,
     contraption.denomination AS contraption_denomination,
     contraption.id_code AS contraption_id_code,
-    transaction_time
+    transaction_time,
+    count(*) OVER() AS result_qt
 
     FROM history LEFT JOIN contraption ON (history.contraption_id = contraption.contraption_id)
 
@@ -510,12 +518,11 @@ router.get('/year-histories', function(req, res, next) {
 
   let currentDate = new Date();
   // currentDate.setFullYear(currentDate.getFullYear() - pageQuery);
-  let currentYear = currentDate.getFullYear() - pageQuery;
+  let currentYear = currentDate.getFullYear() - (pageQuery - 1);
   let nextYear = currentYear + 1;
 
   let currentDateString = `${currentYear}-01-01`;
   let nextDateString = `${nextYear}-01-01`;
-
 
   req.magazutDb.any(sqlQuery, [nextDateString, currentDateString])
     .then(function(dbRes) {
@@ -543,10 +550,12 @@ router.get('/contraption-histories', function(req, res, next) {
   var offset = (pageQuery - 1) * limit;
   var sqlQuery = `SELECT
     transaction_time, involved_quantity, history.contraption_id,
+    employee.employee_id AS employee_id,
     employee.name AS employee_name,
     employee.second_name AS employee_second_name,
     contraption.denomination AS contraption_denomination,
     contraption.id_code AS contraption_id_code,
+    contraption.contraption_id AS contraption_id,
     transaction_id,
     count(*) OVER() AS result_qt
 
@@ -561,7 +570,7 @@ router.get('/contraption-histories', function(req, res, next) {
 
   req.magazutDb.any(sqlQuery, [offset, limit, contraption_id])
     .then(function(dbRes) {
-      addPagination(data.data, dbRes[0].result_qt, limit, pageQuery);
+      addPagination(data.data, dbRes[0].result_qt, limit, pageQuery, dbRes.length);
       data.data = data.data.concat(parseContraptionHistory(dbRes));
       res.send(data);
     })
@@ -598,8 +607,9 @@ router.get('/employee-histories', function(req, res, next) {
 
     FROM history LEFT JOIN employee ON (user_id = employee_id) LEFT JOIN contraption ON (history.contraption_id = contraption.contraption_id)
 
-    WHERE history.user_id=$3
+    WHERE history.user_id=$3 AND transaction_id=2
 
+    ORDER BY transaction_time DESC
     LIMIT $2
     OFFSET $1
     `;
@@ -608,7 +618,7 @@ router.get('/employee-histories', function(req, res, next) {
 
   req.magazutDb.any(sqlQuery,  [offset, limit, employee_id])
     .then(function(dbRes) {
-      addPagination(data.data, dbRes[0].result_qt, limit, pageQuery);
+      addPagination(data.data, dbRes[0].result_qt, limit, pageQuery, dbRes.length, dbRes.length);
       data.data = data.data.concat(parseEmployeeHistory(dbRes));
       res.send(data);
     })
