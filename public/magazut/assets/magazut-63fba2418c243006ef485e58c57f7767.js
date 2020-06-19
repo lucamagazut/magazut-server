@@ -227,7 +227,7 @@ var d=function(e,t){var n=new RegExp(e.token),a=""
 return-1!==t.search(n)&&(a=t.match(n)[0].replace(/[^0-9]/g,"")),a}(o.c_id,l)
 if(""!==d)u={c_id:d}
 else if(function(e,t){var n=!1
-return e.tokens.forEach(function(e,a){t.includes(e)&&(n=!0)}),n}(o["id-code"],i))u={"id-code":i}
+return e.tokens.forEach(function(e,a){t.startsWith(e)&&(n=!0)}),n}(o["id-code"],i))u={"id-code":i}
 else{var c=function(e,t){var a,o,r={}
 for(a in e)r[a]=n(e[a],t)
 var i={}
@@ -293,4 +293,4 @@ var t=Ember.HTMLBars.template({id:"0pmZPmy5",block:'{"symbols":[],"statements":[
 e.default=t}),define("magazut/transforms/boolean",["exports","@ember-data/serializer/-private"],function(e,t){Object.defineProperty(e,"__esModule",{value:!0}),Object.defineProperty(e,"default",{enumerable:!0,get:function(){return t.BooleanTransform}})}),define("magazut/transforms/data-ita",["exports","ember-data","moment"],function(e,t,n){Object.defineProperty(e,"__esModule",{value:!0}),e.default=void 0
 var a=t.default.Transform.extend({deserialize:function(e){return(0,n.default)(e).locale("it").format("D MMMM YYYY, H:mm")},serialize:function(e){return e}})
 e.default=a}),define("magazut/transforms/date",["exports","@ember-data/serializer/-private"],function(e,t){Object.defineProperty(e,"__esModule",{value:!0}),Object.defineProperty(e,"default",{enumerable:!0,get:function(){return t.DateTransform}})}),define("magazut/transforms/number",["exports","@ember-data/serializer/-private"],function(e,t){Object.defineProperty(e,"__esModule",{value:!0}),Object.defineProperty(e,"default",{enumerable:!0,get:function(){return t.NumberTransform}})}),define("magazut/transforms/string",["exports","@ember-data/serializer/-private"],function(e,t){Object.defineProperty(e,"__esModule",{value:!0}),Object.defineProperty(e,"default",{enumerable:!0,get:function(){return t.StringTransform}})}),define("magazut/config/environment",[],function(){try{var e="magazut/config/environment",t=document.querySelector('meta[name="'+e+'"]').getAttribute("content"),n={default:JSON.parse(decodeURIComponent(t))}
-return Object.defineProperty(n,"__esModule",{value:!0}),n}catch(a){throw new Error('Could not read config from meta tag with name "'+e+'".')}}),runningTests||require("magazut/app").default.create({name:"magazut",version:"0.0.0+c82a9bae"})
+return Object.defineProperty(n,"__esModule",{value:!0}),n}catch(a){throw new Error('Could not read config from meta tag with name "'+e+'".')}}),runningTests||require("magazut/app").default.create({name:"magazut",version:"0.0.0+ab73338c"})
