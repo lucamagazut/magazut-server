@@ -240,8 +240,10 @@ var getQueryLike = function(queryRequestText){
     else{
       queryLike +=  ` OR LOWER(contraption.denomination) LIKE '%${item}%'`;
     }
+    queryLike +=  `  OR LOWER(contraption.id_code) LIKE '%${item}%'`;
   });
   queryLike+= ')';
+  console.log(`queryLike ${queryLike}`);
   return queryLike;
 };
 
