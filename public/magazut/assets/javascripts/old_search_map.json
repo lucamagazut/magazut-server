@@ -9,6 +9,10 @@
     "token":"{c_id=[0-9]+",
     "id":"c_id"
   },
+  "id-code":{
+    "name":"code_id filter",
+    "tokens":["FHM-N","FHM-M","FHM4T","MHSS","MP","PHMF","PHM","PHSS","PCHSS","FHMSG","CNMG","TCMT","KNUX","DNMG","CCMT","WNMG","SCMT","DCMT"]
+  },
   "filters":{
     "filter":[
       {
@@ -27,7 +31,7 @@
             "id":[4],
             "name":"Svasatori",
             "tokens":["svasatore","svasatori","svasa"],
-            "text":["svasatore","svasa"]
+            "text":["svasatore"]
           },
           {
             "id":[4],
@@ -53,7 +57,7 @@
           {
             "name":"inserti",
             "id":[7],
-            "tokens":["inserti", "a inserti", "placchette"]
+            "tokens":["inserti", "a inserti", "placchette", "cannone"]
           }
         ]
       },
@@ -140,7 +144,51 @@
       {
         "name":"Inserto",
         "id":[3],
-        "tokens":["inserto","inserti"]
+        "tokens":["inserto","inserti"],
+        "subtypes":[
+          {
+            "id":[3],
+            "name":"CNMG",
+            "tokens":["cnmg"],
+            "text":["cnmg"]
+          },
+          {
+            "id":[3],
+            "name":"KNUX",
+            "tokens":["knux"],
+            "text":["knux"]
+          },
+          {
+            "id":[3],
+            "name":"DNMG",
+            "tokens":["dnmg"],
+            "text":["dnmg"]
+          },
+          {
+            "id":[3],
+            "name":"CCMT",
+            "tokens":["ccmt"],
+            "text":["ccmt"]
+          },
+          {
+            "id":[3],
+            "name":"WNMG",
+            "tokens":["wnmg","trigono"],
+            "text":["wnmg"]
+          },
+          {
+            "id":[3],
+            "name":"SCMT",
+            "tokens":["scmt"],
+            "text":["scmt"]
+          },
+          {
+            "id":[3],
+            "name":"DCMT",
+            "tokens":["dcmt"],
+            "text":["dcmt"]
+          }
+        ]
       }
     ],
     "machine":[
@@ -167,9 +215,9 @@
         "tokens":["centro","fresatrice","alesatrice"]
       },
       {
-        "name":"Stozza",
+        "name":"Strozza",
         "id":[4],
-        "tokens":["strozza","strozzatrice","stozza","stozzatrice","chiavetta"]
+        "tokens":["strozza","strozzatrice","chiavetta"]
       },
       {
         "name":"Trapano",
