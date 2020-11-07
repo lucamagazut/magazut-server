@@ -415,7 +415,7 @@ router.get('/unloading-histories', function(req, res, next) {
   let limit = queryRequest.items_for_page ? Number(queryRequest.items_for_page) : 15;
   var offset = (pageQuery - 1) * limit;
   var sqlQuery = `SELECT
-    transaction_time, involved_quantity, history.contraption_id,
+    history.transaction_id, transaction_time, involved_quantity, transaction.it_short_description, history.contraption_id,
     http_app_location, http_api_location, log, employee.name AS employee_name,
     user_id,
     employee.second_name AS employee_second_name,
@@ -423,9 +423,12 @@ router.get('/unloading-histories', function(req, res, next) {
     contraption.id_code AS contraption_id_code,
     count(*) OVER() AS result_qt
 
-    FROM history LEFT JOIN employee ON (user_id = employee_id) LEFT JOIN contraption ON (history.contraption_id = contraption.contraption_id)
+    FROM history
+    LEFT JOIN employee ON (user_id = employee_id)
+    LEFT JOIN contraption ON (history.contraption_id = contraption.contraption_id)
+    LEFT JOIN transaction ON (history.transaction_id = transaction.transaction_id)
 
-    WHERE transaction_id=2
+    WHERE (history.transaction_id=2 OR history.transaction_id=1 OR history.transaction_id=6 OR history.transaction_id=7)
     ORDER BY history_event_id DESC
     LIMIT $2
     OFFSET $1`;
@@ -599,6 +602,8 @@ router.get('/employee-histories', function(req, res, next) {
   let limit = queryRequest.items_for_page ? Number(queryRequest.items_for_page) : 25;
   var offset = (pageQuery - 1) * limit;
   var sqlQuery = `SELECT
+    transaction.transaction_id,
+    transaction.it_short_description,
     involved_quantity AS quantity, history.contraption_id,
     contraption.denomination AS contraption_denomination,
     contraption.id_code AS contraption_id_code,
@@ -607,9 +612,13 @@ router.get('/employee-histories', function(req, res, next) {
     employee.name AS employee_name, employee.second_name AS employee_second_name, employee.employee_id AS employee_id,
     count(*) OVER() AS result_qt
 
-    FROM history LEFT JOIN employee ON (user_id = employee_id) LEFT JOIN contraption ON (history.contraption_id = contraption.contraption_id)
+    FROM history
+    LEFT JOIN employee ON (user_id = employee_id)
+    LEFT JOIN contraption ON (history.contraption_id = contraption.contraption_id)
+    LEFT JOIN transaction ON (history.transaction_id = transaction.transaction_id)
 
-    WHERE history.user_id=$3 AND transaction_id=2
+
+    WHERE history.user_id=$3
 
     ORDER BY transaction_time DESC
     LIMIT $2
