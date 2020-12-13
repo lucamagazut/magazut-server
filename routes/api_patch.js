@@ -2,27 +2,28 @@ var express = require('express');
 var router = express.Router();
 var orderManager = require('../services/order-manager');
 var history = require('../services/history');
+var errorManager = require('../services/errorManager');
 
 var parseSingleContraption = function(singleRecord){
   let newData = {
       id: singleRecord.contraption_id,
       type:"contraption",
       attributes:{
-        idCode: singleRecord.id_code,
+        id_code: singleRecord.id_code,
         denomination: singleRecord.denomination,
         type: singleRecord.type,
-        material:singleRecord.work_material,
+        work_material:singleRecord.work_material,
         machine: singleRecord.machine,
         purchaseRequest: singleRecord.purchase_request || '',
         order_status: singleRecord.order_status,
-        availableQt: singleRecord.available_qt,
+        available_qt: singleRecord.available_qt,
         borrowed_qt: singleRecord.borrowed_qt,
-        minQt: singleRecord.minimum_qt,
-        "ut-long": singleRecord.geometry_length,
-        "ut-thick": singleRecord.geometry_thickness,
-        "ut-rad-ins": singleRecord.geometry_radius,
-        "ut-dia": singleRecord.geometry_diameter,
-        "ut-deg": singleRecord.geometry_degree
+        minimum_qt: singleRecord.minimum_qt,
+        geometry_length: singleRecord.geometry_length,
+        geometry_thickness: singleRecord.geometry_thickness,
+        geometry_radius: singleRecord.geometry_radius,
+        geometry_diameter: singleRecord.geometry_diameter,
+        geometry_degree: singleRecord.geometry_degree
       }
     };
   return newData;
@@ -57,7 +58,7 @@ router.patch('/contraptions/:id', function(req, res, next) {
     WHERE contraption_id=$16
     RETURNING *`;
 
-  newState = orderManager.getNewState(queryRequest.availableQt, queryRequest.minQt, queryRequest.borrowed_qt);
+  newState = orderManager.getNewState(queryRequest.available_qt, queryRequest.minimum_qt, queryRequest.borrowed_qt);
   console.log('@#@#@#@#@#');
   console.log(newState);
 
@@ -65,17 +66,17 @@ router.patch('/contraptions/:id', function(req, res, next) {
     queryRequest.denomination,
     queryRequest.type,
     queryRequest.machine,
-    queryRequest.material,
-    queryRequest.idCode,
-    queryRequest.availableQt,
-    queryRequest.minQt,
+    queryRequest.work_material,
+    queryRequest.id_code,
+    queryRequest.available_qt,
+    queryRequest.minimum_qt,
     newState,
-    queryRequest['ut-dia'],
-    queryRequest['ut-rad-ins'],
-    queryRequest['ut-long'],
-    queryRequest['ut-deg'],
-    queryRequest['ut-thick'],
-    queryRequest.purchaseRequest,
+    queryRequest.geometry_diameter,
+    queryRequest.geometry_radius,
+    queryRequest.geometry_length,
+    queryRequest.geometry_degree,
+    queryRequest.geometry_thickness,
+    queryRequest.purchase_request || '',
     queryRequest.borrowed_qt,
     contraptionId
   ];
@@ -83,6 +84,10 @@ router.patch('/contraptions/:id', function(req, res, next) {
   req.magazutDb.one(updateQuery, updateQUeryParam)
       .then(function(item) {
           history.addModifyRecord(req, contraptionId,updateQUeryParam);
+          if(orderManager.shouldSendMail(item.order_status, item.minimum_qt)){
+            req.sendOrderMail(item.id_code, item.denomination, item.available_qt, '');
+          }
+
           newData.data = parseSingleContraption(item);
           res.send(newData);
       })
@@ -91,5 +96,6 @@ router.patch('/contraptions/:id', function(req, res, next) {
           res.send(error);
       });
 });
+
 
 module.exports = router;

@@ -77,50 +77,52 @@ app.getNewState = function(newAvailableQt, minQt, currentBorrowedQt){
   }
 };
 
-app.getNewStateAndQt = function(item, qtToAdd, isCharging, isBorrowed, isReturned){
 
-  const currentAvailableQt = Number(item.available_qt);
-  const currentBorrowedQt = Number(item.borrowed_qt);
-  console.log('cacca');
-  console.log(item.borrowed_qt);
-  const minQt = Number(item.minimum_qt);
-  const currentOrderStatus = Number(item.order_status);
+app.getStateInCharging = function(contraption, qt_to_add){
+  let available_qt = Number(contraption.available_qt) + qt_to_add;
+  let minimum_qt = Number(contraption.minimum_qt);
 
-  var returningObj = {
-    available_qt: null,
-    borrowed_qt: null,
-    order_status: null
+  console.log('getStateInCharging');
+  console.log(`available_qt ${available_qt}`);
+  console.log(`minimum_qt ${minimum_qt}`);
+  console.log(`qt_to_add ${qt_to_add}`);
+
+  if(available_qt >= minimum_qt){
+    return 1;
+  }else if (available_qt < minimum_qt && available_qt > 0) {
+    return 2;
+  }else{
+    return 0;
   }
-
-  let newAvailableQt;
-  if(isCharging){
-    console.log('isCharging');
-    newAvailableQt = currentAvailableQt + qtToAdd;
-    returningObj.available_qt = newAvailableQt;
-    if(isReturned){
-      returningObj.borrowed_qt = currentBorrowedQt === 0 || currentBorrowedQt < qtToAdd ? 0 : currentBorrowedQt - qtToAdd;
-    }
-    else{
-      returningObj.borrowed_qt = currentBorrowedQt;
-    }
-    returningObj.order_status = app.getNewState(newAvailableQt, minQt, currentBorrowedQt);
-  }
-  else{
-    newAvailableQt = currentAvailableQt - qtToAdd;
-    returningObj.available_qt = newAvailableQt;
-    if(isBorrowed){
-      returningObj.borrowed_qt = currentBorrowedQt + qtToAdd;
-      returningObj.order_status = currentOrderStatus;
-    }
-    else{
-      returningObj.borrowed_qt = currentBorrowedQt;
-      returningObj.order_status = app.getNewState(newAvailableQt, minQt, currentBorrowedQt);
-    }
-  }
-
-  return returningObj;
-
 };
+
+
+app.getStateInDischarging = function(contraption, qt_to_remove){
+
+  let available_qt = Number(contraption.available_qt) - qt_to_remove;
+  let minimum_qt = Number(contraption.minimum_qt);
+  let order_status = Number(contraption.order_status);
+
+  if(order_status === 3 || order_status === 4){
+    return order_status;
+  }
+  else if(available_qt >= minimum_qt){
+    return 1;
+  }else if (available_qt < minimum_qt && available_qt > 0) {
+    return 2;
+  }else{
+    return 0;
+  }
+};
+
+app.shouldSendMailInDischarging = function(order_status, minimum_qt){
+  if(Number(minimum_qt) === 0){
+    return false;
+  }
+  return order_status == 0 || order_status == 2;
+};
+
+
 
 app.validate = function(availableQt, qtToAdd, isCharging){
   if(isCharging){

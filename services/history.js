@@ -16,16 +16,18 @@ var app = {
   addChargingRecord(req, isReturned){
     const queryRequest = req.query;
 
-    const operator = queryRequest.op || 0;
-    const transaction_id = isReturned ? 7 : 1;
+    const operator = 0;
+    const transaction_id = 1;
     const contraption_id = queryRequest.id;
-    const involved_quantity = queryRequest.qt;
+    const involved_quantity = Number(queryRequest.qt);
     const http_app_location = {"url":req.header('Referer')};
     const http_api_location = {"protocol": req.protocol, "host":req.get('host'), "originalUrl":req.originalUrl};
     const log = {"description": 'Aggiunta quantita'};
 
     let sqlVars = [operator, transaction_id, contraption_id, involved_quantity, http_app_location, http_api_location, log ];
 
+    console.log('sono qui');
+    console.log(sqlVars);
     req.magazutDb.none(getSqlQuery(), sqlVars)
       .then(function() {
           console.log('addChargingRecord OK');
@@ -36,11 +38,41 @@ var app = {
       });
 
   },
+  addHistoryRecord(historyObj, req){
+    const http_app_location = {"url":req.header('Referer')};
+    const http_api_location = {"protocol": req.protocol, "host":req.get('host'), "originalUrl":req.originalUrl};
+    const log = historyObj.log || {'': ''};
+    let transaction_id = historyObj.transaction_id;
+
+
+    if(historyObj.employee_id == 1000 && historyObj.transaction_id == 6){
+      transaction_id = 8;
+    }
+
+    let sqlVars = [
+      historyObj.employee_id,
+      transaction_id,
+      historyObj.contraption_id,
+      historyObj.involved_quantity,
+      http_app_location,
+      http_api_location,
+      log
+    ];
+
+    req.magazutDb.none(getSqlQuery(), sqlVars)
+      .then(function() {
+          console.log('addHistoryRecord OK');
+      })
+      .catch(function(error) {
+          console.log('addHistoryRecord FAIL');
+          console.log(error);
+      });
+  },
   addUnchargingRecord(req, isBorrowed){
     const queryRequest = req.query;
 
     const operator = queryRequest.op || 0;
-    const transaction_id = isBorrowed ? 6 : 2;
+    const transaction_id = 2;
     const contraption_id = queryRequest.id;
     const involved_quantity = queryRequest.qt;
     const http_app_location = {"url":req.header('Referer')};

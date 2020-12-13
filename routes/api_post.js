@@ -47,26 +47,26 @@ var getSqlQuery = function(){
 
 var getSqlVars = function(paramsObj){
   var sqlVars = [];
-  let availableQt = Number(paramsObj.attributes.availableQt);
-  let borrowed_qt = Number(paramsObj.attributes.borrowed_qt);
-  let minQt = Number(paramsObj.attributes.minQt);
-  let orderStatus = orderManager.getNewState(availableQt, minQt, borrowed_qt);
+  let available_qt = Number(paramsObj.attributes.available_qt);
+  let borrowed_qt = 0;
+  let minimum_qt = Number(paramsObj.attributes.minimum_qt);
+  let orderStatus = orderManager.getNewState(available_qt, minimum_qt, borrowed_qt);
 
   sqlVars.push(paramsObj.attributes.denomination);
   sqlVars.push(paramsObj.attributes.type);
   sqlVars.push(paramsObj.attributes.machine);
-  sqlVars.push(paramsObj.attributes.material);
-  sqlVars.push(paramsObj.attributes.idCode);
+  sqlVars.push(paramsObj.attributes.work_material);
+  sqlVars.push(paramsObj.attributes.id_code);
   sqlVars.push(paramsObj.attributes.purchaseRequest || '');
-  sqlVars.push(availableQt);
+  sqlVars.push(available_qt);
   sqlVars.push(borrowed_qt);
-  sqlVars.push(minQt);
+  sqlVars.push(minimum_qt);
   sqlVars.push(orderStatus);
-  sqlVars.push(paramsObj.attributes['ut-dia']);
-  sqlVars.push(paramsObj.attributes['ut-long']);
-  sqlVars.push(paramsObj.attributes['ut-rad-ins']);
-  sqlVars.push(paramsObj.attributes['ut-thick']);
-  sqlVars.push(paramsObj.attributes['ut-deg']);
+  sqlVars.push(paramsObj.attributes.geometry_diameter);
+  sqlVars.push(paramsObj.attributes.geometry_length);
+  sqlVars.push(paramsObj.attributes.geometry_radius);
+  sqlVars.push(paramsObj.attributes.geometry_thickness);
+  sqlVars.push(paramsObj.attributes.geometry_degree);
 
   return sqlVars;
 
@@ -91,6 +91,9 @@ router.post('/contraptions', function(req, res) {
       // if(orderManager.sendMail(item.order_status)){
       //   req.sendOrderMail(item.id_code, item.denomination, item.available_qt, item.purchase_request);
       // }
+      if(orderManager.shouldSendMail(item.order_status, item.minimum_qt)){
+        req.sendOrderMail(item.id_code, item.denomination, item.available_qt, '');
+      }
       var objToReturn = {
         'data':
           {
@@ -111,5 +114,21 @@ router.post('/contraptions', function(req, res) {
     });
 
 });
+
+
+router.post('/send-mail', function(req, res) {
+  const postParams = req.body;
+  const to = postParams.email;
+  const text = postParams.text;
+  const subject = postParams.subject;
+
+  let newData = {data:{}};
+
+  req.sendMail(to, subject, text);
+
+  newData.data = {result:'success'};
+  res.send(newData);
+});
+
 
 module.exports = router;

@@ -2,74 +2,114 @@ var express = require('express');
 var router = express.Router();
 var orderManager = require('../services/order-manager');
 var history = require('../services/history');
+var errorManager = require('../services/errorManager');
 
 
-router.put(['/charge', '/discharge'], function(req, res, next) {
+router.put('/charge', function(req, res, next) {
   const queryRequest = req.query;
-  const contraptionId = queryRequest.id;
-  const operator = queryRequest.op;
-  const isBorrowed = queryRequest.is_borrowed == 'true';
-  const isReturned = queryRequest.is_returned == 'true';
-  const isCharging = req.path === '/charge';
-  const qtToAdd =  Number(queryRequest.qt);
-  var newData = {data:[]};
-  var newObjContraction = {
-    id:contraptionId,
-    type:'contraption',
-    attributes:{}
-  };
+  const contraption_id = queryRequest.contraption_id;
+  const qt_to_add =  Number(queryRequest.qt_to_add);
   var lastSqlQuery = '';
 
-  newData.data.push(newObjContraction);
-  var sqlQuerySelect = `SELECT minimum_qt, available_qt, borrowed_qt, order_status FROM contraption WHERE contraption_id = $1`;
-  lastSqlQuery = sqlQuerySelect;
-  console.log(sqlQuerySelect)
-  req.magazutDb.task(t => {
-    return t.one(sqlQuerySelect, [contraptionId])
-      .then(item => {
-        if(!orderManager.validate(item.available_qt, qtToAdd, isCharging)){
-          console.log('entra qui');
-          throw {name:'error',type:'invalidRequest'};
-        }
+  let newStatus = orderManager.getStateInCharging(queryRequest, qt_to_add);
 
-        console.log(item);
+  var sqlQuery = `
 
-        let newStateAndQt = orderManager.getNewStateAndQt(item, qtToAdd, isCharging, isBorrowed, isReturned);
+    UPDATE contraption SET available_qt = available_qt + $2, order_status=$3
+    WHERE contraption_id = $1
 
-        let updateQuery = `UPDATE contraption SET available_qt = $1, borrowed_qt=$2, order_status = $3
-          WHERE contraption_id = $4 RETURNING contraption_id, denomination, id_code, available_qt, minimum_qt, borrowed_qt, order_status`;
+    RETURNING *
 
-        lastSqlQuery = updateQuery;
-        return t.one(updateQuery, [newStateAndQt.available_qt, newStateAndQt.borrowed_qt, newStateAndQt.order_status, contraptionId]);
-      });
-    })
+    `;
+  lastSqlQuery = sqlQuery;
+  console.log(sqlQuery)
+  req.magazutDb.one(sqlQuery,[contraption_id, qt_to_add, newStatus])
     .then(item => {
-      newObjContraction.attributes.availableQt = item.available_qt;
-      newObjContraction.attributes.borrowed_qt = item.borrowed_qt;
-      newObjContraction.attributes.order_status = item.order_status;
 
-      if(orderManager.shouldSendMail(item.order_status, item.minimum_qt)){
-        req.sendOrderMail(item.id_code, item.denomination, item.available_qt, item.purchase_request);
-      }
+      let newData = {
+        data:{
+          type:'contraption',
+          id:contraption_id,
+          attributes:item
+        }
+      };
 
-      if(isCharging){
-        console.log('addChargingRecord');
-        history.addChargingRecord(req, isReturned);
-      }else{
-        console.log('addUnchargingRecord');
-        history.addUnchargingRecord(req, isBorrowed);
-      }
       res.send(newData);
+      history.addHistoryRecord({employee_id:0, transaction_id:1, involved_quantity:qt_to_add,contraption_id:contraption_id},req);
     })
     .catch(error => {
       console.log('errore');
       console.log(error);
-        history.addErrorRecord(req, contraptionId, lastSqlQuery, error);
+
+        history.addErrorRecord(req, contraption_id, lastSqlQuery, error);
         res.send(error);
     });
 });
 
 
+router.put('/discharge', function(req, res, next) {
+  const queryRequest = req.query;
+  const contraption_id = queryRequest.contraption_id;
+  const qt_to_remove =  Number(queryRequest.qt_to_remove);
+  const minimum_qt = Number(queryRequest.minimum_qt);
+  const available_qt = Number(queryRequest.available_qt);
+  const borrowed_qt = Number(queryRequest.borrowed_qt);
+  const employee_id = Number(queryRequest.employee_id);
+  const order_status = Number(queryRequest.order_status);
+
+
+  var lastSqlQuery = '';
+
+  // dobbiamo:
+  // validare se farlo
+  // sapere se cambia lo stato
+  // sapere se mandare la mail
+  // sapere se si può fare
+  // modifcare le due cosette
+
+  if(qt_to_remove > (available_qt - borrowed_qt)){
+    throw errorManager.getError("Richiesta non valida", "La quantità da rimuovere deve essere inferiore a quella disponibile in magazzino.", 403);
+  }
+
+  let newOrderStatus = orderManager.getStateInDischarging(queryRequest, qt_to_remove);
+  let shouldSendMail = orderManager.shouldSendMailInDischarging(newOrderStatus, minimum_qt);
+
+  var sqlQuery = `
+
+    UPDATE contraption SET available_qt = available_qt - $2, order_status=$3
+    WHERE contraption_id = $1
+
+    RETURNING *
+
+    `;
+  lastSqlQuery = sqlQuery;
+  console.log(sqlQuery)
+  req.magazutDb.one(sqlQuery,[contraption_id, qt_to_remove, newOrderStatus])
+    .then(item => {
+
+      let newData = {
+        data:{
+          type:'contraption',
+          id:contraption_id,
+          attributes:item
+        }
+      };
+
+      res.send(newData);
+      console.log(`shouldSendMail ${shouldSendMail}`);
+      if(shouldSendMail){
+        req.sendOrderMail(item.id_code, item.denomination, item.available_qt, item.purchase_request);
+      }
+      history.addHistoryRecord({employee_id:employee_id, transaction_id:2, involved_quantity:qt_to_remove,contraption_id:contraption_id},req);
+    })
+    .catch(error => {
+      console.log('errore');
+      console.log(error);
+
+        history.addErrorRecord(req, contraption_id, lastSqlQuery, error);
+        res.send(error);
+    });
+});
 
 router.put('/order', function(req, res, next) {
   const queryRequest = req.query;
@@ -95,7 +135,7 @@ router.put('/order', function(req, res, next) {
           sqlQuery = 'UPDATE contraption SET order_status=$2 WHERE contraption_id=$1 RETURNING *';
         }
         else{
-          throw {name:'error',type:'invalidRequest'};
+          throw errorManager.getError("Richiesta non valida", "Il cambiamento di stato è stato annullato", 403);
         }
         return t.one(sqlQuery, [contraptionId, newOrderStatus]);
       });

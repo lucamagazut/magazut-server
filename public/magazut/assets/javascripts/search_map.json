@@ -15,6 +15,11 @@
         "name":"Filtro Runout",
         "id":["runout"],
         "tokens":["{runout}"]
+      },
+      {
+        "name":"Filtro prestati",
+        "id":["borrowed"],
+        "tokens":["{borrowed}"]
       }
     ],
     "contraption_type":[

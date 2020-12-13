@@ -25,4 +25,6 @@ app.email_credential = {
   }
 };
 
+app.allow_ip_password = '';
+
 module.exports = app;

@@ -19,5 +19,4 @@ router.delete('/contraptions/:id', function(req, res, next) {
       });
 });
 
-
 module.exports = router;
