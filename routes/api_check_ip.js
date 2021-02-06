@@ -28,6 +28,7 @@ let notAllowedIpError = {
 };
 
 let checkAllowedIp = function(req, res, next, ip){
+  console.log('dentro checkAllowedIp');
   if(req.allowed_ip_list.indexOf(ip) !== -1){
     return next();
   }else{

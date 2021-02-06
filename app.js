@@ -84,6 +84,22 @@ var mailMiddle = function(req, res, next){
     return message;
   };
 
+  var createEmptyMagMessage = function(id_code, denomination, available_qt, borrowed_qt){
+    let diff = Number(available_qt) - Number(borrowed_qt);
+    let message = `
+      Prodotto "${denomination}" id-code "${id_code}"
+
+      La quantità prestata o da affilare è superiore a quella minima.
+      Nel magazzino sono ancora disponibili ${diff}, mentre quelli prestati/da affilare sono ${borrowed_qt}.
+
+
+      ------------------------------------------------
+      Email generata automaticamente dalla app per la gestione del magazzino utensili.
+      Non rispondere, questa casella email non è monitorata. Per ogni comunicazione scrivere a ${config.email_credential.reference}
+    `;
+    return message;
+  };
+
   var mailOptions = {
       to: config.email_credential.mailOptions.to,
       subject: config.email_credential.mailOptions.subject,
@@ -98,6 +114,17 @@ var mailMiddle = function(req, res, next){
         return console.log(error);
       }
       console.log('Mail di ordine mandata');
+    });
+  };
+
+  req.sendMailEmptyMag = function(id_code, denomination, available_qt, borrowed_qt){
+    console.log('dentro app.js sendMailEmptyMag');
+    mailOptions.text = createEmptyMagMessage(id_code, denomination, available_qt, borrowed_qt);
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        return console.log(error);
+      }
+      console.log('Mail empty mag mandata');
     });
   };
 

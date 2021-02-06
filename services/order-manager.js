@@ -122,6 +122,19 @@ app.shouldSendMailInDischarging = function(order_status, minimum_qt){
   return order_status == 0 || order_status == 2;
 };
 
+app.shouldSendMailEmptyMag = function(available_qt, minimum_qt, borrowed_qt){
+  available_qt = Number(available_qt);
+  minimum_qt = Number(minimum_qt);
+  borrowed_qt = Number(borrowed_qt);
+  if(minimum_qt === 0){
+    return false;
+  }
+
+  let inMagQt = available_qt - borrowed_qt;
+
+  return inMagQt < minimum_qt;
+};
+
 
 
 app.validate = function(availableQt, qtToAdd, isCharging){

@@ -162,6 +162,9 @@ router.post('/borrowing', function(req, res, next) {
       };
       res.send(newData);
 
+      if(orderManager.shouldSendMailEmptyMag(item.available_qt, item.minimum_qt, item.borrowed_qt)){
+        req.sendMailEmptyMag(item.id_code, item.denomination, item.available_qt, item.borrowed_qt);
+      }
       history.addHistoryRecord({employee_id: employee_id, transaction_id:6, involved_quantity:qt_to_return, contraption_id:contraption_id},req);
     })
     .catch(error => {
